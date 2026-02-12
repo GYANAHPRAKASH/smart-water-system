@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="fw-bold text-primary">Resident Dashboard</h2>
+        <p class="text-muted">Welcome, {{ current_user.first_name }}! <span
+                class="badge bg-success rounded-pill ms-2">Credits: {{ current_user.credits }}</span></p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Report Issue & History -->
+    <div class="col-md-7 mb-4">
+        <!-- New Complaint Form -->
+        <div class="card glass-card border-0 mb-4">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="fw-bold text-primary"><i class="bi bi-megaphone-fill"></i> Report an Issue</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('user.submit_complaint') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Issue Type</label>
+                        <select class="form-select rounded-pill" name="type" required>
+                            <option value="Pipe Leakage">Pipe Leakage</option>
+                            <option value="Low Pressure">Low Water Pressure</option>
+                            <option value="No Water">No Water Supply</option>
+                            <option value="Contamination">Water Contamination</option>
+                            <option value="Meter Fault">Meter Fault</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description (AI Analyzed for Priority)</label>
+                        <textarea class="form-control" name="description" rows="3"
+                            placeholder="Describe the issue... e.g., 'Severe pipe burst causing flooding'"
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-aqua rounded-pill w-100">Submit Report</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Complaint History -->
+        <div class="card glass-card border-0">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="fw-bold text-primary">My Reports</h5>
+            </div>
+            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                {% if complaints %}
+                {% for complaint in complaints %}
+                <div class="p-3 mb-2 border rounded-3 bg-white shadow-sm">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="fw-bold">{{ complaint.type }}</h6>
+                        <span
+                            class="badge bg-{{ 'danger' if complaint.priority == 'High' else ('warning' if complaint.priority == 'Medium' else 'success') }}">{{
+                            complaint.priority }} Priority</span>
+                    </div>
+                    <p class="small text-muted mb-1">{{ complaint.description }}</p>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-secondary">{{ complaint.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        <span class="badge bg-{{ 'success' if complaint.status == 'Resolved' else 'secondary' }}">{{
+                            complaint.status }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted text-center">No reports history.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Schedule & Status -->
+    <div class="col-md-5">
+        <div class="card glass-card border-0 mb-4 h-100">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="fw-bold text-primary"><i class="bi bi-calendar-event"></i> Water Schedule ({{
+                    current_user.colony }})</h5>
+            </div>
+            <div class="card-body">
+                <div id='user-calendar'></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Details Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-primary" id="eventTitle">Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Time:</strong> <span id="eventTime"></span></p>
+                <p><strong>Status:</strong> <span id="eventStatus" class="badge"></span></p>
+                <p><strong>Notes:</strong> <span id="eventNotes" class="text-muted"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FullCalendar -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('user-calendar');
+
+        // Safe JSON injection
+        const schedules = {{ schedules_data | tojson
+    }};
+    const events = schedules.map(schedule => ({
+        title: schedule.action,
+        start: schedule.date_time,
+        backgroundColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
+        borderColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
+        extendedProps: {
+            notes: schedule.notes || '',
+            time: schedule.time_str,
+            status: schedule.action
+        }
+    }));
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next',
+            center: 'title',
+            right: 'dayGridMonth,listWeek'
+        },
+        height: 400,
+        events: events,
+        eventClick: function (info) {
+            var props = info.event.extendedProps;
+            document.getElementById('eventTitle').innerText = info.event.title;
+            document.getElementById('eventTime').innerText = info.event.start.toLocaleDateString() + ' ' + props.time;
+
+            var badge = document.getElementById('eventStatus');
+            badge.innerText = props.status;
+            badge.className = 'badge ' + (props.status === 'Supply' ? 'bg-success' : 'bg-danger');
+
+            document.getElementById('eventNotes').innerText = props.notes || 'No additional notes.';
+
+            new bootstrap.Modal(document.getElementById('eventModal')).show();
+        }
+    });
+    calendar.render();
+    });
+</script>
+</div>
+</div>
+{% endblock %}

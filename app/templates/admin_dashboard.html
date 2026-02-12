@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4 fw-bold text-primary">Admin Dashboard</h2>
+
+<!-- Navigation Tabs -->
+<ul class="nav nav-pills mb-4 gap-2 p-2 glass-card rounded-pill" id="adminTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active rounded-pill px-4" id="overview-tab" data-bs-toggle="pill"
+            data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">
+            <i class="bi bi-grid-fill me-2"></i>Overview
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill px-4" id="schedule-tab" data-bs-toggle="pill"
+            data-bs-target="#schedule-content" type="button" role="tab" aria-controls="schedule-content"
+            aria-selected="false">
+            <i class="bi bi-calendar-check-fill me-2"></i>Water Schedule
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill px-4" id="complaints-tab" data-bs-toggle="pill"
+            data-bs-target="#complaints-content" type="button" role="tab" aria-controls="complaints-content"
+            aria-selected="false">
+            <i class="bi bi-exclamation-octagon-fill me-2"></i>Complaints
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill px-4" id="users-tab" data-bs-toggle="pill" data-bs-target="#users-content"
+            type="button" role="tab" aria-controls="users-content" aria-selected="false">
+            <i class="bi bi-people-fill me-2"></i>User Mgmt
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="adminTabsContent">
+
+    <!-- Overview Tab -->
+    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+        <!-- Stats Cards -->
+        <div class="row mb-5">
+            <div class="col-md-3">
+                <div class="card glass-card border-0 mb-3 text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Total Users</h5>
+                        <h2 class="text-primary fw-bold">{{ users|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card glass-card border-0 mb-3 text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Pending Users</h5>
+                        <h2 class="text-warning fw-bold">{{ pending_users|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card glass-card border-0 mb-3 text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Complaints</h5>
+                        <h2 class="text-danger fw-bold">{{ complaints|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card glass-card border-0 mb-3 text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Schedules</h5>
+                        <h2 class="text-info fw-bold">{{ schedules|length }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights Section -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card glass-card border-0 h-100">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold text-info"><i class="bi bi-graph-up-arrow"></i> AI Demand Prediction</h5>
+                        <span class="badge bg-info text-dark">Next 7 Days</span>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="demandChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card glass-card border-0 h-100">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Anomaly
+                            Detection</h5>
+                    </div>
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                        {% if anomalies %}
+                        {% for anomaly in anomalies %}
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-circle-fill fs-4 me-2"></i>
+                            <div>
+                                <strong>{{ anomaly.date }}</strong><br>
+                                {{ anomaly.status }}: {{ anomaly.amount }}L
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center text-success mt-4">
+                            <i class="bi bi-check-circle-fill fs-1"></i>
+                            <p class="mt-2">No anomalies detected.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Water Schedule Tab -->
+    <div class="tab-pane fade" id="schedule-content" role="tabpanel" aria-labelledby="schedule-tab">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card glass-card border-0 mb-4 h-100">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold text-primary"><i class="bi bi-calendar3"></i> Master Schedule</h5>
+                        <small class="text-muted">Click on any date to schedule supply/shutdown</small>
+                    </div>
+                    <div class="card-body">
+                        <div id='admin-calendar'></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complaints Tab -->
+    <div class="tab-pane fade" id="complaints-content" role="tabpanel" aria-labelledby="complaints-tab">
+        <div class="card glass-card border-0">
+            <div class="card-header bg-transparent border-0">
+                <h5 class="fw-bold text-danger"><i class="bi bi-megaphone-fill"></i> Recent Complaints</h5>
+            </div>
+            <div class="card-body">
+                {% if complaints %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Type</th>
+                                <th>Desc</th>
+                                <th>Priority (AI)</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for complaint in complaints %}
+                            <tr>
+                                <td>#{{ complaint.id }}</td>
+                                <td>{{ complaint.user.username }} <br><small class="text-muted">{{
+                                        complaint.user.colony }}</small></td>
+                                <td>{{ complaint.type }}</td>
+                                <td>{{ complaint.description }}</td>
+                                <td>
+                                    <span
+                                        class="badge rounded-pill bg-{{ 'danger' if complaint.priority == 'High' else 'warning' if complaint.priority == 'Medium' else 'secondary' }}">
+                                        {{ complaint.priority }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span
+                                        class="badge rounded-pill bg-{{ 'success' if complaint.status == 'Resolved' else 'danger' }}">
+                                        {{ complaint.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if complaint.status == 'Open' %}
+                                    <a href="{{ url_for('admin.resolve_complaint', complaint_id=complaint.id) }}"
+                                        class="btn btn-sm btn-outline-success rounded-pill">Resolve (+10 Credits)</a>
+                                    {% else %}
+                                    <span class="text-muted"><i class="bi bi-check-circle-fill"></i> Done</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center p-4">No complaints found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management Tab -->
+    <div class="tab-pane fade" id="users-content" role="tabpanel" aria-labelledby="users-tab">
+        <div class="row">
+            <!-- Pending Approvals -->
+            <div class="col-md-12 mb-4">
+                <div class="card glass-card border-0 border-warning">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold text-warning"><i class="bi bi-person-fill-exclamation"></i> Pending User
+                            Approvals</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if pending_users %}
+                        <div class="list-group">
+                            {% for user in pending_users %}
+                            <div
+                                class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                                <div>
+                                    <h6 class="mb-0">{{ user.first_name }} {{ user.last_name }} (@{{ user.username }})
+                                    </h6>
+                                    <small class="text-muted">{{ user.colony }} - Door: {{ user.door_no }}</small>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('admin.approve_user', user_id=user.id) }}"
+                                        class="btn btn-success btn-sm rounded-pill me-2">Approve</a>
+                                    <a href="{{ url_for('admin.reject_user', user_id=user.id) }}"
+                                        class="btn btn-danger btn-sm rounded-pill">Reject</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted">No pending approvals.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Users List -->
+            <div class="col-md-12">
+                <div class="card glass-card border-0">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="fw-bold text-secondary"><i class="bi bi-people"></i> All Users</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Colony</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Credits</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.colony }}</td>
+                                        <td>{{ user.role }}</td>
+                                        <td>
+                                            <span
+                                                class="badge bg-{{ 'success' if user.status == 'approved' else 'warning' }}">
+                                                {{ user.status }}
+                                            </span>
+                                        </td>
+                                        <td>{{ user.credits }}</td>
+                                        <td>
+                                            {% if user.role != 'admin' %}
+                                            <a href="{{ url_for('admin.delete_user', user_id=user.id) }}"
+                                                class="btn btn-sm btn-outline-danger rounded-pill"
+                                                onclick="return confirm('Are you sure?')">Delete</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Schedule Modal -->
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-primary" id="scheduleModalLabel">Schedule Water Supply</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('admin.schedule_supply') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Colony</label>
+                        <select class="form-select rounded-pill" name="colony" required>
+                            <option value="Green Valley">Green Valley</option>
+                            <option value="Blue Heights">Blue Heights</option>
+                            <option value="Sunshine Apts">Sunshine Apts</option>
+                            <option value="Admin Office">Admin Office</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Action</label>
+                        <select class="form-select rounded-pill" name="action" required>
+                            <option value="Supply">Water Supply</option>
+                            <option value="Shutdown">Shutdown/Maintenance</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control rounded-pill" name="date" id="modalDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Time</label>
+                            <input type="time" class="form-control rounded-pill" name="time" id="modalTime" required>
+                        </div>
+                    </div>
+                    <input type="text" class="form-control rounded-pill mb-3" name="notes"
+                        placeholder="Notes (Optional)">
+                    <button type="submit" class="btn btn-aqua rounded-pill w-100">Confirm Schedule</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- FullCalendar CSS & JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // AI Demand Chart Use Safe Data Access
+        var ctx = document.getElementById('demandChart').getContext('2d');
+
+        // Use safe JSON injection
+        const predictions = {{ predictions | tojson
+    }};
+    const labels = predictions.map(p => p.date);
+    const data = predictions.map(p => p.amount);
+
+    var demandChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Predicted Demand (Liters)',
+                data: data,
+                borderColor: '#0dcaf0',
+                backgroundColor: 'rgba(13, 202, 240, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    // Initialize Calendar
+    var calendarEl = document.getElementById('admin-calendar');
+
+    // Safe JSON injection for schedules
+    const schedules = {{ schedules_data | tojson }};
+    const events = schedules.map(schedule => ({
+        title: `${schedule.colony} - ${schedule.action}`,
+        start: schedule.date_time,
+        backgroundColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
+        borderColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
+        extendedProps: {
+            notes: schedule.notes || '',
+            time: schedule.time_str
+        }
+    }));
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        height: 500,
+        editable: true,
+        selectable: true,
+        events: events,
+        // On Date Click -> Open Modal to Schedule
+        dateClick: function (info) {
+            var modal = new bootstrap.Modal(document.getElementById('scheduleModal'));
+            document.getElementById('modalDate').value = info.dateStr;
+            // Default time to 09:00 if not specified
+            document.getElementById('modalTime').value = "09:00";
+            modal.show();
+        },
+        // On Event Click -> Show Details
+        eventClick: function (info) {
+            var notes = info.event.extendedProps.notes ? info.event.extendedProps.notes : 'No notes';
+            var time = info.event.extendedProps.time;
+            alert('Event: ' + info.event.title + '\nTime: ' + time + '\nNotes: ' + notes);
+        }
+    });
+
+    // Render calendar when tab is clicked to ensure it sizes correctly
+    var scheduleTab = document.getElementById('schedule-tab');
+    if (scheduleTab) {
+        scheduleTab.addEventListener('shown.bs.tab', function (e) {
+            calendar.render();
+        });
+    }
+
+    calendar.render(); // Initial Render
+    });
+</script>
+{% endblock %}

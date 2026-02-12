@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row align-items-center" style="min-height: 60vh;">
+    <div class="col-md-6 text-center text-md-start">
+        <h1 class="display-3 fw-bold text-primary mb-3">Smart Water Management</h1>
+        <p class="lead text-muted mb-4">
+            Efficiently manage community water resources with <span class="fw-bold text-info">AquaFlow</span>.
+            Real-time schedules, smart complaint resolution, and detailed analytics.
+        </p>
+        <div class="d-grid gap-2 d-md-block">
+            {% if current_user.is_authenticated %}
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-aqua btn-lg rounded-pill px-5 fw-bold">Go to
+                Dashboard <i class="bi bi-arrow-right"></i></a>
+            {% else %}
+            <a href="{{ url_for('user.dashboard') }}" class="btn btn-aqua btn-lg rounded-pill px-5 fw-bold">Go to
+                Dashboard <i class="bi bi-arrow-right"></i></a>
+            {% endif %}
+            {% else %}
+            <a href="{{ url_for('auth.login') }}"
+                class="btn btn-aqua btn-lg rounded-pill px-4 fw-bold me-md-2">Login</a>
+            <a href="{{ url_for('auth.register') }}"
+                class="btn btn-outline-primary btn-lg rounded-pill px-4 fw-bold">Register</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6 text-center">
+        <!-- Replaced placeholder image with a styled icon/div for now since we can't generate images yet -->
+        <div class="p-5 rounded-circle bg-white shadow-lg d-inline-block animate-float">
+            <i class="bi bi-water text-info" style="font-size: 8rem;"></i>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+
+        100% {
+            transform: translateY(0px);
+        }
+    }
+</style>
+{% endblock %}
