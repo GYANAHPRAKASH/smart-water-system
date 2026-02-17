@@ -63,3 +63,13 @@ class Schedule(db.Model):
 
     def __repr__(self):
         return f"Schedule('{self.colony}', '{self.date_time}', '{self.action}')"
+
+class AIRequestLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    endpoint = db.Column(db.String(50), nullable=False)
+    input_data = db.Column(db.Text, nullable=False)
+    output_data = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"AIRequestLog('{self.endpoint}', '{self.timestamp}')"

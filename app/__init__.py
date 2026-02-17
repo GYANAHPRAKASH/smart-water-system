@@ -25,4 +25,7 @@ def create_app(config_class=Config):
     from .routes_admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint)
 
+    from .routes_api import api as api_blueprint
+    app.register_blueprint(api_blueprint)
+
     return app

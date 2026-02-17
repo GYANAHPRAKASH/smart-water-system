@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import Schedule
+from app.models import Schedule, AIRequestLog
 
 app = create_app()
 
