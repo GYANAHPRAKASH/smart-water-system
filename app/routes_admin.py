@@ -14,19 +14,22 @@ def dashboard():
         flash('Access Denied: You are not an admin.', 'danger')
         return redirect(url_for('user.dashboard'))
     
-    # Generate simulated data for demo
-    generate_simulated_data('Admin Office') # Using Admin's colony for demo
+    # Get selected colony from query params, default to first one
+    selected_colony = request.args.get('colony', 'Anna Nagar')
+    all_colonies = ["Anna Nagar", "Nungambakkam", "T. Nagar", "Alwarpet", "Gopalapuram"]
     
-    # AI Analysis
-    predictions = predict_demand('Admin Office')
-    anomalies = detect_anomalies('Admin Office')
+    # AI Analysis & Data for Selected Colony
+    predicted_demand = predict_demand(selected_colony)
+    anomalies = detect_anomalies(selected_colony)
     
     users = User.query.all()
     pending_users = User.query.filter_by(status='pending').all()
     complaints = Complaint.query.order_by(Complaint.created_at.desc()).all()
+    
+    # Filter schedules (Optional: can also filter by colony if needed, but keeping all for overview)
     schedules = Schedule.query.order_by(Schedule.date_time.desc()).all()
     
-    # Serialize schedules for JS calendar
+    # Maintain existing schedule serialization
     schedules_data = [{
         'colony': s.colony,
          'action': s.action,
@@ -41,8 +44,10 @@ def dashboard():
                            complaints=complaints, 
                            schedules=schedules,
                            schedules_data=schedules_data,
-                           predictions=predictions,
-                           anomalies=anomalies)
+                           predictions=predicted_demand,
+                           anomalies=anomalies,
+                           selected_colony=selected_colony,
+                           all_colonies=all_colonies)
 
 @admin.route("/admin/approve_user/<int:user_id>")
 @login_required

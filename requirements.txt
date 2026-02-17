@@ -4,3 +4,4 @@ flask-login
 flask-migrate
 email_validator
 werkzeug
+asgiref
