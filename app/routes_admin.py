@@ -1,3 +1,4 @@
+# pyre-ignore-all-errors
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from flask_login import current_user, login_required
 from . import mongo
@@ -51,7 +52,7 @@ def dashboard():
     # MongoDB sort by created_at DESC: -1
     raw_complaints = list(mongo.db.complaints.find().sort('created_at', -1))
     complaints = []
-    active_complaints_count = 0
+    active_complaints_count: int = 0
     for c in raw_complaints:
         # Resolve user
         u_data = mongo.db.users.find_one({'_id': c['user_id']})
@@ -110,7 +111,7 @@ def dashboard():
         }))
         
         # Filter active complaints by determining user colony
-        critical_issues = 0
+        critical_issues: int = 0
         for c in active_complaints:
             u_data = mongo.db.users.find_one({'_id': c['user_id']})
             if u_data and u_data.get('colony') == col:

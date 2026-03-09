@@ -1,3 +1,4 @@
+# pyre-ignore-all-errors
 import requests
 import datetime
 

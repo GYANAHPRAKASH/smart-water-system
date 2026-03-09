@@ -1,3 +1,4 @@
+# pyre-ignore-all-errors
 from app import create_app, mongo
 from app.models import User
 

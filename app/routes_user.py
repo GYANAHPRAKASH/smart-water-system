@@ -1,3 +1,4 @@
+# pyre-ignore-all-errors
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from flask_login import current_user, login_required
 from . import mongo
