@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from flask_login import current_user, login_required
-from . import db
-from .models import User, Complaint, Schedule
+from . import mongo
+from bson.objectid import ObjectId
 from .ai_module import analyze_complaint
 from datetime import datetime
 
@@ -13,21 +13,31 @@ def dashboard():
     if current_user.role == 'admin':
         return redirect(url_for('admin.dashboard'))
         
-    my_complaints = Complaint.query.filter_by(user_id=current_user.id).order_by(Complaint.created_at.desc()).all()
+    my_complaints = list(mongo.db.complaints.find({'user_id': ObjectId(current_user.id)}).sort('created_at', -1))
+    
     # Filter schedules for the user's colony
-    # In a real app, we might want to filter by date too.
-    schedules = Schedule.query.filter_by(colony=current_user.colony).order_by(Schedule.date_time.desc()).all()
+    schedules = list(mongo.db.schedules.find({'colony': current_user.colony}).sort('date_time', -1))
     
     # Serialize schedules for JS calendar
     schedules_data = [{
-        'colony': s.colony,
-         'action': s.action,
-         'notes': s.notes,
-         'date_time': s.date_time.isoformat(),
-         'time_str': s.date_time.strftime("%I:%M %p")
+        'colony': s['colony'],
+         'action': s['action'],
+         'notes': s.get('notes', ''),
+         'date_time': s['date_time'].isoformat(),
+         'time_str': s['date_time'].strftime("%I:%M %p")
     } for s in schedules]
     
-    return render_template('user_dashboard.html', complaints=my_complaints, schedules=schedules, schedules_data=schedules_data)
+    # Check if user is top 2 (Gamification constraint)
+    top_users_data = list(mongo.db.users.find({'role': 'user'}).sort('credits', -1).limit(2))
+    top_user_ids = [str(u['_id']) for u in top_users_data if u.get('credits', 0) > 0]
+    
+    is_top_user = str(current_user.id) in top_user_ids
+
+    return render_template('user_dashboard.html', 
+                           complaints=my_complaints, 
+                           schedules=schedules, 
+                           schedules_data=schedules_data,
+                           is_top_user=is_top_user)
 
 @user.route("/user/submit_complaint", methods=['POST'])
 @login_required
@@ -38,9 +48,15 @@ def submit_complaint():
     # AI Logic
     priority = analyze_complaint(description)
     
-    new_complaint = Complaint(user_id=current_user.id, type=type, description=description, priority=priority)
-    db.session.add(new_complaint)
-    db.session.commit()
+    new_complaint = {
+        'user_id': ObjectId(current_user.id),
+        'type': type,
+        'description': description,
+        'priority': priority,
+        'status': 'Pending',
+        'created_at': datetime.utcnow()
+    }
+    mongo.db.complaints.insert_one(new_complaint)
     
     flash(f'Complaint Submitted. Priority set to {priority} based on analysis.', 'success')
     return redirect(url_for('user.dashboard'))

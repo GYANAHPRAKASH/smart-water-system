@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request
 import asyncio
 import random
+from datetime import datetime
+from . import mongo
 from .ai_module import analyze_complaint, predict_demand
 
 api = Blueprint('api', __name__)
@@ -20,17 +22,14 @@ async def api_predict_demand():
     predictions = predict_demand(colony)
     
     # Log to DB
-    from .models import AIRequestLog
-    from . import db
     import json
-    
-    log = AIRequestLog(
-        endpoint='/api/predict_demand',
-        input_data=json.dumps(data),
-        output_data=json.dumps(predictions)
-    )
-    db.session.add(log)
-    db.session.commit()
+    log = {
+        'endpoint': '/api/predict_demand',
+        'input_data': json.dumps(data),
+        'output_data': json.dumps(predictions),
+        'timestamp': datetime.utcnow()
+    }
+    mongo.db.ai_logs.insert_one(log)
     
     return jsonify({
         'status': 'success',
@@ -53,17 +52,14 @@ async def api_analyze_complaint():
     priority = analyze_complaint(description)
     
     # Log to DB
-    from .models import AIRequestLog
-    from . import db
     import json
-    
-    log = AIRequestLog(
-        endpoint='/api/analyze_complaint',
-        input_data=json.dumps(data),
-        output_data=json.dumps({'priority': priority})
-    )
-    db.session.add(log)
-    db.session.commit()
+    log = {
+        'endpoint': '/api/analyze_complaint',
+        'input_data': json.dumps(data),
+        'output_data': json.dumps({'priority': priority}),
+        'timestamp': datetime.utcnow()
+    }
+    mongo.db.ai_logs.insert_one(log)
 
     return jsonify({
         'status': 'success',

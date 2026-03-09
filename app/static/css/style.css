@@ -1,0 +1,225 @@
+/* Aqua Flow Design System */
+
+:root {
+  /* Ocean Palette */
+  --aqua-primary: #0077b6;
+  --aqua-secondary: #00b4d8;
+  --aqua-tertiary: #90e0ef;
+  --aqua-light: #caf0f8;
+  --deep-ocean: #03045e;
+  
+  /* Utilities */
+  --bg-color: #f0f7f9;
+  --text-color: #2b2d42;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--aqua-light);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--aqua-secondary);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--aqua-primary);
+}
+
+/* Typography Enhancements */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--deep-ocean);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.text-gradient {
+  background: linear-gradient(45deg, var(--deep-ocean), var(--aqua-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glassmorphism 2.0 */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 119, 182, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 119, 182, 0.15);
+}
+
+/* Floating Navigation */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50px;
+  max-width: 90%;
+}
+
+.nav-hover {
+  position: relative;
+  color: var(--text-color) !important;
+  transition: color 0.3s ease;
+}
+.nav-hover::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 50%;
+  background-color: var(--aqua-secondary);
+  transition: all 0.3s ease;
+}
+.nav-hover:hover::after {
+  width: 100%;
+  left: 0;
+}
+.nav-hover:hover {
+  color: var(--aqua-primary) !important;
+}
+
+/* Micro-Interactions */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 180, 216, 0.3) !important;
+}
+
+/* Custom Buttons */
+.btn-aqua {
+  background: linear-gradient(135deg, var(--aqua-primary), var(--aqua-secondary));
+  color: white;
+  border: none;
+}
+.btn-aqua:hover {
+  background: linear-gradient(135deg, var(--deep-ocean), var(--aqua-primary));
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 180, 216, 0.4);
+}
+
+.btn-outline-aqua {
+  border: 2px solid var(--aqua-primary);
+  color: var(--aqua-primary);
+  background: transparent;
+}
+.btn-outline-aqua:hover {
+  background: var(--aqua-primary);
+  color: white;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--aqua-secondary);
+  box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.15);
+  background-color: #fff;
+}
+
+/* Animated Water Background */
+.aqua-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--bg-color) 0%, var(--aqua-light) 100%);
+  overflow: hidden;
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 100px;
+  background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg"><path fill="%23caf0f8" fill-opacity="0.5" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,160C672,160,768,192,864,208C960,224,1056,224,1152,213.3C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x;
+  background-size: 50% 100%;
+  animation: wave 15s linear infinite;
+  transform: translate3d(0, 0, 0);
+}
+.wave1 {
+  bottom: -20px;
+  animation-duration: 20s;
+  opacity: 0.7;
+}
+.wave2 {
+  bottom: 0px;
+  animation-duration: 15s;
+  animation-direction: reverse;
+  opacity: 0.5;
+  background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg"><path fill="%2390e0ef" fill-opacity="0.4" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,192C672,181,768,139,864,133.3C960,128,1056,160,1152,176C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x;
+  background-size: 50% 100%;
+}
+
+@keyframes wave {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Content spacing */
+.content-wrapper {
+  margin-top: 100px;
+  margin-bottom: 60px;
+  min-height: calc(100vh - 160px);
+}
+
+/* Toast styling */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 1055;
+}
+.glass-toast {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: var(--deep-ocean) !important;
+  border: 1px solid rgba(0, 119, 182, 0.2) !important;
+  border-left: 5px solid var(--aqua-primary) !important;
+}
+
+.text-primary {
+    color: var(--aqua-primary) !important;
+}
+.text-secondary {
+    color: var(--aqua-secondary) !important;
+}
+.bg-primary {
+    background-color: var(--aqua-primary) !important;
+}
+.bg-secondary {
+    background-color: var(--aqua-secondary) !important;
+}

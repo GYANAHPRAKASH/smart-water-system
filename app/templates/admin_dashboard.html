@@ -1,32 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2 class="mb-4 fw-bold text-primary">Admin Dashboard</h2>
+
+<h2 class="display-6 fw-bold text-gradient mb-4">Admin Dashboard</h2>
 
 <!-- Navigation Tabs -->
-<ul class="nav nav-pills mb-4 gap-2 p-2 glass-card rounded-pill" id="adminTabs" role="tablist">
+<ul class="nav nav-pills mb-5 gap-2 p-2 glass-card rounded-pill shadow-sm border-0 d-inline-flex flex-wrap" id="adminTabs" role="tablist">
     <li class="nav-item" role="presentation">
-        <button class="nav-link active rounded-pill px-4" id="overview-tab" data-bs-toggle="pill"
+        <button class="nav-link active rounded-pill px-4 fw-medium" id="overview-tab" data-bs-toggle="pill"
             data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">
             <i class="bi bi-grid-fill me-2"></i>Overview
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link rounded-pill px-4" id="schedule-tab" data-bs-toggle="pill"
+        <button class="nav-link rounded-pill px-4 fw-medium" id="schedule-tab" data-bs-toggle="pill"
             data-bs-target="#schedule-content" type="button" role="tab" aria-controls="schedule-content"
             aria-selected="false">
             <i class="bi bi-calendar-check-fill me-2"></i>Water Schedule
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link rounded-pill px-4" id="complaints-tab" data-bs-toggle="pill"
+        <button class="nav-link rounded-pill px-4 fw-medium" id="complaints-tab" data-bs-toggle="pill"
             data-bs-target="#complaints-content" type="button" role="tab" aria-controls="complaints-content"
             aria-selected="false">
             <i class="bi bi-exclamation-octagon-fill me-2"></i>Complaints
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link rounded-pill px-4" id="users-tab" data-bs-toggle="pill" data-bs-target="#users-content"
+        <button class="nav-link rounded-pill px-4 fw-medium" id="users-tab" data-bs-toggle="pill" data-bs-target="#users-content"
             type="button" role="tab" aria-controls="users-content" aria-selected="false">
             <i class="bi bi-people-fill me-2"></i>User Mgmt
         </button>
@@ -39,36 +40,40 @@
     <!-- Overview Tab -->
     <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
         <!-- Stats Cards -->
-        <div class="row mb-5">
+        <div class="row mb-5 g-4">
             <div class="col-md-3">
-                <div class="card glass-card border-0 mb-3 text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-muted">Total Users</h5>
-                        <h2 class="text-primary fw-bold">{{ users|length }}</h2>
+                <div class="card glass-card border-0 text-center shadow-sm hover-lift h-100 py-3" style="cursor: pointer;" onclick="document.getElementById('users-tab').click()">
+                    <div class="card-body p-2">
+                        <div class="mb-3 d-inline-flex rounded-circle p-3 bg-white shadow-sm text-primary"><i class="bi bi-people fs-4"></i></div>
+                        <h5 class="card-title text-muted fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">Total Users</h5>
+                        <h2 class="text-primary fw-bold mb-0 display-5">{{ users|length }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card glass-card border-0 mb-3 text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-muted">Pending Users</h5>
-                        <h2 class="text-warning fw-bold">{{ pending_users|length }}</h2>
+                <div class="card glass-card border-0 text-center shadow-sm hover-lift h-100 py-3" style="cursor: pointer;" onclick="document.getElementById('users-tab').click()">
+                    <div class="card-body p-2">
+                        <div class="mb-3 d-inline-flex rounded-circle p-3 bg-white shadow-sm text-warning"><i class="bi bi-person-exclamation fs-4"></i></div>
+                        <h5 class="card-title text-muted fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">Pending Users</h5>
+                        <h2 class="text-warning fw-bold mb-0 display-5">{{ pending_users|length }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card glass-card border-0 mb-3 text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-muted">Complaints</h5>
-                        <h2 class="text-danger fw-bold">{{ complaints|length }}</h2>
+                <div class="card glass-card border-0 text-center shadow-sm hover-lift h-100 py-3" style="cursor: pointer;" onclick="document.getElementById('complaints-tab').click()">
+                    <div class="card-body p-2">
+                        <div class="mb-3 d-inline-flex rounded-circle p-3 bg-white shadow-sm text-danger"><i class="bi bi-megaphone fs-4"></i></div>
+                        <h5 class="card-title text-muted fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">Complaints</h5>
+                        <h2 class="text-danger fw-bold mb-0 display-5">{{ active_complaints_count }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card glass-card border-0 mb-3 text-center">
-                    <div class="card-body">
-                        <h5 class="card-title text-muted">Schedules</h5>
-                        <h2 class="text-info fw-bold">{{ schedules|length }}</h2>
+                <div class="card glass-card border-0 text-center shadow-sm hover-lift h-100 py-3" style="cursor: pointer;" onclick="document.getElementById('schedule-tab').click()">
+                    <div class="card-body p-2">
+                        <div class="mb-3 d-inline-flex rounded-circle p-3 bg-white shadow-sm text-info"><i class="bi bi-calendar2-check fs-4"></i></div>
+                        <h5 class="card-title text-muted fw-bold text-uppercase" style="font-size: 0.85rem; letter-spacing: 1px;">Schedules</h5>
+                        <h2 class="text-info fw-bold mb-0 display-5">{{ schedules|length }}</h2>
                     </div>
                 </div>
             </div>
@@ -92,13 +97,13 @@
         </div>
 
         <!-- AI Insights Section -->
-        <div class="row mb-4">
+        <div class="row mb-5 g-4">
             <div class="col-md-8">
-                <div class="card glass-card border-0 h-100">
-                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold text-info"><i class="bi bi-graph-up-arrow"></i> AI Demand Prediction ({{
+                <div class="card glass-card border-0 h-100 shadow-sm">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2">
+                        <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-graph-up-arrow text-info me-2"></i> AI Demand Prediction ({{
                             selected_colony }})</h5>
-                        <span class="badge bg-info text-dark">Next 7 Days</span>
+                        <span class="badge bg-info text-dark rounded-pill shadow-sm px-3">Next 7 Days</span>
                     </div>
                     <div class="card-body">
                         <canvas id="demandChart"></canvas>
@@ -106,9 +111,9 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card glass-card border-0 h-100">
-                    <div class="card-header bg-transparent border-0">
-                        <h5 class="fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Anomaly
+                <div class="card glass-card border-0 h-100 shadow-sm">
+                    <div class="card-header bg-transparent border-0 pt-4 pb-2">
+                        <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i> Anomaly
                             Detection</h5>
                     </div>
                     <div class="card-body" style="max-height: 300px; overflow-y: auto;">
@@ -120,7 +125,9 @@
                             <div>
                                 <strong>{{ anomaly.date }}</strong><br>
                                 {{ anomaly.status }} Usage: {{ anomaly.amount }}L<br>
-                                <small class="text-muted">Reason: {{ anomaly.reason }}</small>
+                                <small class="text-muted">Reason: {{ anomaly.reason }}</small><br>
+                                <small class="text-primary fw-bold"><i class="bi bi-lightbulb-fill"></i> Suggestion: {{
+                                    anomaly.suggestion }}</small>
                             </div>
                         </div>
                         {% endfor %}
@@ -138,12 +145,27 @@
 
     <!-- Water Schedule Tab -->
     <div class="tab-pane fade" id="schedule-content" role="tabpanel" aria-labelledby="schedule-tab">
-        <div class="row">
+        <div class="row mb-4">
             <div class="col-md-12">
-                <div class="card glass-card border-0 mb-4 h-100">
-                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold text-primary"><i class="bi bi-calendar3"></i> Master Schedule</h5>
-                        <small class="text-muted">Click on any date to schedule supply/shutdown</small>
+                <div class="card glass-card border-0 mb-4 h-100 shadow-sm">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2">
+                        <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-calendar3 text-primary me-2"></i> Master Schedule</h5>
+                        <div class="btn-group" role="group" aria-label="Calendar Filter">
+                            <input type="radio" class="btn-check" name="calendarFilter" id="filterAll" value="all"
+                                checked>
+                            <label class="btn btn-outline-primary btn-sm rounded-pill me-1" for="filterAll">Show
+                                All</label>
+
+                            <input type="radio" class="btn-check" name="calendarFilter" id="filterSupply"
+                                value="Supply">
+                            <label class="btn btn-outline-success btn-sm rounded-pill me-1" for="filterSupply">Supply
+                                Only</label>
+
+                            <input type="radio" class="btn-check" name="calendarFilter" id="filterShutdown"
+                                value="Shutdown">
+                            <label class="btn btn-outline-danger btn-sm rounded-pill" for="filterShutdown">Shutdown
+                                Only</label>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div id='admin-calendar'></div>
@@ -155,9 +177,9 @@
 
     <!-- Complaints Tab -->
     <div class="tab-pane fade" id="complaints-content" role="tabpanel" aria-labelledby="complaints-tab">
-        <div class="card glass-card border-0">
-            <div class="card-header bg-transparent border-0">
-                <h5 class="fw-bold text-danger"><i class="bi bi-megaphone-fill"></i> Recent Complaints</h5>
+        <div class="card glass-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 pt-4 pb-2">
+                <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-megaphone-fill text-danger me-2"></i> Recent Complaints</h5>
             </div>
             <div class="card-body">
                 {% if complaints %}
@@ -195,11 +217,11 @@
                                     </span>
                                 </td>
                                 <td>
-                                    {% if complaint.status == 'Open' %}
+                                    {% if complaint.status != 'Resolved' %}
                                     <a href="{{ url_for('admin.resolve_complaint', complaint_id=complaint.id) }}"
                                         class="btn btn-sm btn-outline-success rounded-pill">Resolve (+10 Credits)</a>
                                     {% else %}
-                                    <span class="text-muted"><i class="bi bi-check-circle-fill"></i> Done</span>
+                                    <span class="text-muted"><i class="bi bi-check-circle-fill text-success"></i> Resolved</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -219,9 +241,9 @@
         <div class="row">
             <!-- Pending Approvals -->
             <div class="col-md-12 mb-4">
-                <div class="card glass-card border-0 border-warning">
-                    <div class="card-header bg-transparent border-0">
-                        <h5 class="fw-bold text-warning"><i class="bi bi-person-fill-exclamation"></i> Pending User
+                <div class="card glass-card border-0 shadow-sm" style="border-left: 4px solid var(--bs-warning) !important;">
+                    <div class="card-header bg-transparent border-0 pt-4 pb-2">
+                        <h5 class="fw-bold text-warning"><i class="bi bi-person-fill-exclamation me-2"></i> Pending User
                             Approvals</h5>
                     </div>
                     <div class="card-body">
@@ -252,10 +274,21 @@
             </div>
 
             <!-- All Users List -->
-            <div class="col-md-12">
-                <div class="card glass-card border-0">
-                    <div class="card-header bg-transparent border-0">
-                        <h5 class="fw-bold text-secondary"><i class="bi bi-people"></i> All Users</h5>
+            <div class="col-md-12 mb-4">
+                <div class="card glass-card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2">
+                        <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-people text-secondary me-2"></i> All Users</h5>
+                        <form method="GET" action="{{ url_for('admin.dashboard') }}#users-content" class="d-flex align-items-center gap-2">
+                            <!-- Preserve the main colony tab so it doesn't reset -->
+                            <input type="hidden" name="colony" value="{{ selected_colony }}">
+                            <label class="small text-muted mb-0 text-nowrap">Filter by Colony:</label>
+                            <select class="form-select form-select-sm rounded-pill w-auto" name="user_colony" onchange="this.form.submit()">
+                                <option value="All" {% if user_filter_colony == 'All' %}selected{% endif %}>All Colonies</option>
+                                {% for col in all_colonies %}
+                                <option value="{{ col }}" {% if col == user_filter_colony %}selected{% endif %}>{{ col }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -272,8 +305,13 @@
                                 </thead>
                                 <tbody>
                                     {% for user in users %}
-                                    <tr>
-                                        <td>{{ user.username }}</td>
+                                    <tr class="{% if user.id in top_user_ids %}table-warning{% endif %}">
+                                        <td>
+                                            {{ user.username }}
+                                            {% if user.id in top_user_ids %}
+                                            <span class="ms-2" title="Top Contributor"><i class="bi bi-star-fill text-warning"></i></span>
+                                            {% endif %}
+                                        </td>
                                         <td>{{ user.colony }}</td>
                                         <td>{{ user.role }}</td>
                                         <td>
@@ -282,7 +320,14 @@
                                                 {{ user.status }}
                                             </span>
                                         </td>
-                                        <td>{{ user.credits }}</td>
+                                        <td>
+                                            <span class="fw-bold {% if user.id in top_user_ids %}text-warning{% else %}text-muted{% endif %}">
+                                                {{ user.credits }}
+                                            </span>
+                                            {% if user.id in top_user_ids %}
+                                            <br><small class="text-success fw-bold"><i class="bi bi-tag-fill"></i> 50% Bill Discount</small>
+                                            {% endif %}
+                                        </td>
                                         <td>
                                             {% if user.role != 'admin' %}
                                             <a href="{{ url_for('admin.delete_user', user_id=user.id) }}"
@@ -305,10 +350,10 @@
 
 <!-- Schedule Modal -->
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content glass-card border-0">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold text-primary" id="scheduleModalLabel">Schedule Water Supply</h5>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0 shadow-lg">
+            <div class="modal-header border-0 pt-4 px-4 pb-2">
+                <h5 class="modal-title fw-bold text-gradient" id="scheduleModalLabel">Schedule Water Supply</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -316,10 +361,11 @@
                     <div class="mb-3">
                         <label class="form-label">Colony</label>
                         <select class="form-select rounded-pill" name="colony" required>
-                            <option value="Green Valley">Green Valley</option>
-                            <option value="Blue Heights">Blue Heights</option>
-                            <option value="Sunshine Apts">Sunshine Apts</option>
-                            <option value="Admin Office">Admin Office</option>
+                            <option value="Anna Nagar">Anna Nagar</option>
+                            <option value="Nungambakkam">Nungambakkam</option>
+                            <option value="T. Nagar">T. Nagar</option>
+                            <option value="Alwarpet">Alwarpet</option>
+                            <option value="Gopalapuram">Gopalapuram</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -343,26 +389,54 @@
                         placeholder="Notes (Optional)">
                     <button type="submit" class="btn btn-aqua rounded-pill w-100">Confirm Schedule</button>
                 </form>
+                </form>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
+<!-- Event Details Modal (Admin) -->
+<div class="modal fade" id="adminEventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-0 shadow-lg" style="overflow: hidden;">
+            <div class="modal-header border-0 bg-transparent pt-4 pb-0">
+                <h5 class="modal-title fw-bold text-gradient" id="adminEventTitle">Schedule Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pb-4">
+                <div class="bg-white rounded-4 p-3 shadow-sm mb-3">
+                    <p class="mb-2"><strong><i class="bi bi-clock-fill text-primary me-2"></i>Time:</strong> <span id="adminEventTime" class="text-dark fw-medium"></span></p>
+                    <p class="mb-2 d-flex align-items-center"><strong><i class="bi bi-activity text-primary me-2"></i>Status:</strong> <span id="adminEventStatus" class="badge ms-2 rounded-pill px-3"></span></p>
+                    <hr class="text-muted opacity-25">
+                    <p class="mb-0"><strong><i class="bi bi-card-text text-primary me-2"></i>Notes:</strong> <span id="adminEventNotes" class="text-muted"></span></p>
+                </div>
+                <a id="deleteEventBtn" href="#" class="btn btn-outline-danger rounded-pill w-100 fw-bold shadow-sm" onclick="return confirm('Delete this schedule?');"><i class="bi bi-trash-fill me-2"></i>Delete Schedule</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% block scripts %}
+<!-- Hidden data stores for JS to avoid Jinja linter conflicts -->
+<script id="predictions-data" type="application/json">
+    {{ predictions | tojson }}
+</script>
+<script id="schedules-data" type="application/json">
+    {{ schedules_data | tojson }}
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- FullCalendar CSS & JS -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        
         // AI Demand Chart Use Safe Data Access
         var ctx = document.getElementById('demandChart').getContext('2d');
 
-        // Use safe JSON injection
-        const predictions = {{ predictions | tojson
-    }};
-    const labels = predictions.map(p => p.date);
-    const data = predictions.map(p => p.amount);
+        // Parse data from hidden script tags to avoid Jinja JS syntax errors
+        var predictions = JSON.parse(document.getElementById('predictions-data').textContent);
+    var labels = predictions.map(p => p.date);
+    var data = predictions.map(p => p.amount);
 
     var demandChart = new Chart(ctx, {
         type: 'line',
@@ -390,16 +464,18 @@
     // Initialize Calendar
     var calendarEl = document.getElementById('admin-calendar');
 
-    // Safe JSON injection for schedules
-    const schedules = {{ schedules_data | tojson }};
-    const events = schedules.map(schedule => ({
+    // Parse schedules from hidden script tags
+    var schedules = JSON.parse(document.getElementById('schedules-data').textContent);
+    var allEvents = schedules.map(schedule => ({
+        id: schedule.id,
         title: `${schedule.colony} - ${schedule.action}`,
         start: schedule.date_time,
         backgroundColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
         borderColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
         extendedProps: {
             notes: schedule.notes || '',
-            time: schedule.time_str
+            time: schedule.time_str,
+            action: schedule.action
         }
     }));
 
@@ -410,10 +486,12 @@
             center: 'title',
             right: 'dayGridMonth,timeGridWeek'
         },
-        height: 500,
+        height: 'auto', // Let it breathe, no fixed scrollbar
+        displayEventTime: false, // Hide 12:00a text from monthly view
+        eventDisplay: 'block', // Render as solid bars instead of dots
         editable: true,
         selectable: true,
-        events: events,
+        events: allEvents,
         // On Date Click -> Open Modal to Schedule
         dateClick: function (info) {
             var modal = new bootstrap.Modal(document.getElementById('scheduleModal'));
@@ -424,10 +502,38 @@
         },
         // On Event Click -> Show Details
         eventClick: function (info) {
-            var notes = info.event.extendedProps.notes ? info.event.extendedProps.notes : 'No notes';
-            var time = info.event.extendedProps.time;
-            alert('Event: ' + info.event.title + '\nTime: ' + time + '\nNotes: ' + notes);
+            var props = info.event.extendedProps;
+            document.getElementById('adminEventTitle').innerText = info.event.title;
+            document.getElementById('adminEventTime').innerText = info.event.start.toLocaleDateString() + ' ' + props.time;
+            
+            var badge = document.getElementById('adminEventStatus');
+            badge.innerText = props.action;
+            badge.className = 'badge ms-2 rounded-pill px-3 ' + (props.action === 'Supply' ? 'bg-success' : 'bg-danger');
+            
+            document.getElementById('adminEventNotes').innerText = props.notes || 'No notes.';
+            
+            // Set up delete button
+            document.getElementById('deleteEventBtn').href = '/admin/delete_schedule/' + info.event.id;
+            
+            new bootstrap.Modal(document.getElementById('adminEventModal')).show();
         }
+    });
+
+    // Filtering Logic
+    document.querySelectorAll('input[name="calendarFilter"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            var filterValue = this.value;
+
+            // Filter events
+            var filteredEvents = allEvents.filter(event => {
+                if (filterValue === 'all') return true;
+                return event.extendedProps.action === filterValue;
+            });
+
+            // Remove all and re-add filtered
+            calendar.removeAllEvents();
+            calendar.addEventSource(filteredEvents);
+        });
     });
 
     // Render calendar when tab is clicked to ensure it sizes correctly

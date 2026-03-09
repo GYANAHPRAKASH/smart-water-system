@@ -1,53 +1,79 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card glass-card border-0 p-4">
-            <div class="card-body">
-                <h3 class="text-center mb-4 text-primary fw-bold">Register</h3>
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-9 col-lg-7">
+        <div class="card glass-card border-0 p-4 shadow-lg hover-lift">
+            <div class="card-body p-md-4">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex rounded-circle p-3 mb-3 shadow-sm" style="background-color: var(--aqua-light);">
+                        <i class="bi bi-person-plus-fill fs-1 text-primary"></i>
+                    </div>
+                    <h3 class="fw-bold" style="color: var(--deep-ocean);">Create Account</h3>
+                    <p class="text-muted">Join the AquaFlow community today</p>
+                </div>
                 <form method="POST">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="first_name" class="form-label">First Name</label>
-                            <input type="text" class="form-control rounded-pill" id="first_name" name="first_name"
-                                required>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+                                <label for="first_name" class="text-muted">First Name</label>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="last_name" class="form-label">Last Name</label>
-                            <input type="text" class="form-control rounded-pill" id="last_name" name="last_name"
-                                required>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                                <label for="last_name" class="text-muted">Last Name</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                                <label for="username" class="text-muted"><i class="bi bi-person me-2"></i>Username</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                                <label for="password" class="text-muted"><i class="bi bi-lock me-2"></i>Password</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Phone Number" required>
+                                <label for="phone" class="text-muted"><i class="bi bi-telephone me-2"></i>Phone Number</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-5">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="door_no" name="door_no" placeholder="Door No" required>
+                                <label for="door_no" class="text-muted"><i class="bi bi-house me-2"></i>Door Number</label>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-floating">
+                                <select class="form-select" id="colony" name="colony" required>
+                                    <option value="" disabled selected>Select your colony</option>
+                                    <option value="Anna Nagar">Anna Nagar</option>
+                                    <option value="Nungambakkam">Nungambakkam</option>
+                                    <option value="T. Nagar">T. Nagar</option>
+                                    <option value="Alwarpet">Alwarpet</option>
+                                    <option value="Gopalapuram">Gopalapuram</option>
+                                </select>
+                                <label for="colony" class="text-muted"><i class="bi bi-geo-alt me-2"></i>Colony Name</label>
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control rounded-pill" id="username" name="username" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control rounded-pill" id="password" name="password" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Phone Number</label>
-                        <input type="tel" class="form-control rounded-pill" id="phone" name="phone" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="door_no" class="form-label">Door Number</label>
-                            <input type="text" class="form-control rounded-pill" id="door_no" name="door_no" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="colony" class="form-label">Colony Name</label>
-                            <input type="text" class="form-control rounded-pill" id="colony" name="colony" required>
-                        </div>
-                    </div>
-                    <div class="d-grid gap-2 mt-3">
-                        <button type="submit" class="btn btn-aqua rounded-pill fw-bold">Register</button>
+                    
+                    <div class="d-grid gap-2 mt-5">
+                        <button type="submit" class="btn btn-aqua btn-lg rounded-pill fw-bold shadow">Register Account <i class="bi bi-check-circle ms-2"></i></button>
                     </div>
                 </form>
-                <div class="text-center mt-3">
-                    <small>Already have an account? <a href="{{ url_for('auth.login') }}"
-                            class="text-decoration-none">Login here</a></small>
+                <div class="text-center mt-4">
+                    <p class="text-muted mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-primary fw-bold text-decoration-none nav-hover">Login here</a></p>
                 </div>
             </div>
         </div>

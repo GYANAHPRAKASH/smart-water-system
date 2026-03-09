@@ -1,53 +1,54 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row align-items-center" style="min-height: 60vh;">
-    <div class="col-md-6 text-center text-md-start">
-        <h1 class="display-3 fw-bold text-primary mb-3">Smart Water Management</h1>
-        <p class="lead text-muted mb-4">
-            Efficiently manage community water resources with <span class="fw-bold text-info">AquaFlow</span>.
-            Real-time schedules, smart complaint resolution, and detailed analytics.
+<div class="row align-items-center justify-content-center mt-5 pt-4 text-center" style="min-height: 70vh;">
+    <div class="col-lg-8 mb-5 mb-lg-0">
+        <div class="badge text-primary rounded-pill px-3 py-2 mb-3 fw-bold shadow-sm" style="background-color: var(--aqua-light); border: 1px solid var(--aqua-secondary);">
+            <i class="bi bi-stars"></i> Next-Gen Water Management
+        </div>
+        <h1 class="display-3 fw-bold mb-4" style="color: var(--deep-ocean); line-height: 1.2;">
+            Smart <br><span class="text-gradient">Water Resources</span>
+        </h1>
+        <p class="lead mb-5 mx-auto" style="color: #4a5568; max-width: 600px;">
+            Efficiently manage community water with <span class="fw-bold text-primary">AquaFlow</span>.
+            Experience real-time schedules, smart anomaly detection, and unified community insights.
         </p>
-        <div class="d-grid gap-2 d-md-block">
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
             {% if current_user.is_authenticated %}
-            {% if current_user.role == 'admin' %}
-            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-aqua btn-lg rounded-pill px-5 fw-bold">Go to
-                Dashboard <i class="bi bi-arrow-right"></i></a>
-            {% else %}
-            <a href="{{ url_for('user.dashboard') }}" class="btn btn-aqua btn-lg rounded-pill px-5 fw-bold">Go to
-                Dashboard <i class="bi bi-arrow-right"></i></a>
-            {% endif %}
+                {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-aqua btn-lg rounded-pill px-5 fw-bold hover-lift shadow">
+                    Go to Dashboard <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+                {% else %}
+                <a href="{{ url_for('user.dashboard') }}" class="btn btn-aqua btn-lg rounded-pill px-5 fw-bold hover-lift shadow">
+                    Go to Dashboard <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+                {% endif %}
             {% else %}
             <a href="{{ url_for('auth.login') }}"
-                class="btn btn-aqua btn-lg rounded-pill px-4 fw-bold me-md-2">Login</a>
+                class="btn btn-aqua btn-lg rounded-pill px-5 fw-bold hover-lift shadow">Login</a>
             <a href="{{ url_for('auth.register') }}"
-                class="btn btn-outline-primary btn-lg rounded-pill px-4 fw-bold">Register</a>
+                class="btn btn-outline-aqua btn-lg rounded-pill px-5 fw-bold hover-lift shadow">Register</a>
             {% endif %}
         </div>
-    </div>
-    <div class="col-md-6 text-center">
-        <!-- Replaced placeholder image with a styled icon/div for now since we can't generate images yet -->
-       
+        
+        <div class="mt-5 text-muted small glass-card border-0 p-3 mx-auto shadow-sm" style="max-width: 400px; border-radius: 15px;">
+            <p class="mb-1 fw-bold text-dark"><i class="bi bi-headset me-2 text-primary"></i> Need Help?</p>
+            <p class="mb-0">Contact the City Admin: <a href="mailto:cityadmin@aquaflow.com" class="text-decoration-none text-info fw-bold">cityadmin@aquaflow.com</a><br>
+            Or Call: <span class="fw-bold">+91 98765 43210</span></p>
+        </div>
     </div>
 </div>
 
 <style>
     .animate-float {
-        animation: float 3s ease-in-out infinite;
+        animation: float 4s ease-in-out infinite;
     }
 
     @keyframes float {
-        0% {
-            transform: translateY(0px);
-        }
-
-        50% {
-            transform: translateY(-20px);
-        }
-
-        100% {
-            transform: translateY(0px);
-        }
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+        100% { transform: translateY(0px); }
     }
 </style>
 {% endblock %}

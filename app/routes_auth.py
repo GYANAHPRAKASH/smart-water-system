@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
-from . import db
+from . import mongo
 from .models import User
 
 auth = Blueprint('auth', __name__)
@@ -25,17 +25,25 @@ def register():
         colony = request.form.get('colony')
         
         # Check if user exists
-        user = User.query.filter_by(username=username).first()
-        if user:
+        user_data = mongo.db.users.find_one({'username': username})
+        if user_data:
             flash('Username already exists. Please choose a different one.', 'danger')
             return redirect(url_for('auth.register'))
         
         # Create new user
-        new_user = User(username=username, first_name=first_name, last_name=last_name, 
-                        phone=phone, door_no=door_no, colony=colony, role='user', status='pending')
-        new_user.set_password(password)
-        db.session.add(new_user)
-        db.session.commit()
+        new_user_data = {
+            'username': username,
+            'first_name': first_name,
+            'last_name': last_name,
+            'phone': phone,
+            'door_no': door_no,
+            'colony': colony,
+            'role': 'user',
+            'status': 'pending',
+            'password_hash': User.generate_hash(password),
+            'credits': 0
+        }
+        mongo.db.users.insert_one(new_user_data)
         flash('Your account has been created! You can login after admin approval.', 'success')
         return redirect(url_for('auth.login'))
 
@@ -52,21 +60,25 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        user = User.query.filter_by(username=username).first()
+        user_data = mongo.db.users.find_one({'username': username})
         
-        if user and user.check_password(password):
-            if user.role == 'user' and user.status != 'approved':
-                flash('Your account is pending approval or inactive. Please contact admin.', 'warning')
-                return redirect(url_for('auth.login'))
-            
-            login_user(user)
-            next_page = request.args.get('next')
-            if user.role == 'admin':
-                 return redirect(next_page) if next_page else redirect(url_for('admin.dashboard'))
+        if user_data:
+            user = User(user_data)
+            if user.check_password(password):
+                if user.role == 'user' and user.status != 'approved':
+                    flash('Your account is pending approval or inactive. Please contact admin at cityadmin@aquaflow.com.', 'warning')
+                    return redirect(url_for('auth.login'))
+                
+                login_user(user)
+                next_page = request.args.get('next')
+                if user.role == 'admin':
+                     return redirect(next_page) if next_page else redirect(url_for('admin.dashboard'))
+                else:
+                     return redirect(next_page) if next_page else redirect(url_for('user.dashboard'))
             else:
-                 return redirect(next_page) if next_page else redirect(url_for('user.dashboard'))
+                flash('Login Unsuccessful. Please check username and password', 'danger')
         else:
-            flash('Login Unsuccessful. Please check username and password', 'danger')
+            flash('Account not found! If your account was deleted, please contact cityadmin@aquaflow.com or +91 98765 43210.', 'danger')
             
     return render_template('login.html')
 

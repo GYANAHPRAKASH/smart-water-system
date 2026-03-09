@@ -1,7 +1,6 @@
 flask
-flask-sqlalchemy
+Flask-PyMongo
+pymongo
 flask-login
-flask-migrate
-email_validator
 werkzeug
 asgiref
