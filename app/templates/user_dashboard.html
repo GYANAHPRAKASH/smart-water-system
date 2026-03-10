@@ -32,6 +32,35 @@
     </div>
 </div>
 
+<!-- AI Predictive Insights Widget -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card glass-card border-0 shadow-sm overflow-hidden" style="background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,248,255,0.9));">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between position-relative">
+                <!-- Decorative background icon -->
+                <i class="bi bi-robot text-primary opacity-10 position-absolute end-0 top-50 translate-middle-y" style="font-size: 8rem; margin-right: -2rem;"></i>
+                
+                <div class="d-flex align-items-center z-1 w-100">
+                    <div class="bg-primary text-white rounded-circle p-3 me-3 shadow d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="bi bi-stars fs-3" id="ai-insight-icon"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold mb-1" style="color: var(--deep-ocean);">AI Insights for {{ current_user.colony }}</h5>
+                        <p id="ai-insight-text" class="text-muted mb-0 placeholder-glow">
+                            <span class="placeholder col-8 rounded"></span>
+                        </p>
+                    </div>
+                    <div class="ms-3 z-1">
+                         <span class="badge bg-light text-primary border border-primary rounded-pill px-3 py-2 shadow-sm">
+                            <i class="bi bi-cpu me-1"></i> Phase 2 AI Core
+                         </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row g-4">
     <!-- Left Column: Report Issue & History -->
     <div class="col-md-7 mb-4">
@@ -58,6 +87,11 @@
                             placeholder="Describe the issue... e.g., 'Severe pipe burst causing flooding'"
                             required></textarea>
                         <label for="description" class="text-muted">Description (AI Analyzed for Priority)</label>
+                        <div class="mt-2 text-end">
+                            <small id="ai-priority-badge" class="badge bg-secondary rounded-pill px-3 py-2 lh-sm transition-all" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Analyzing...
+                            </small>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-aqua btn-lg rounded-pill w-100 shadow fw-bold"><i class="bi bi-send-fill me-2"></i>Submit Report</button>
                 </form>
@@ -178,6 +212,122 @@
     calendar.render();
     });
 </script>
+
+<!-- Native AI Integration Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. AI Predictive Insights Widget (On Load Async Call)
+        const colony = "{{ current_user.colony }}";
+        const insightText = document.getElementById('ai-insight-text');
+        const insightIcon = document.getElementById('ai-insight-icon');
+        
+        fetch('/api/predict_demand', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ colony: colony })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success' && data.predictions && data.predictions.length > 0) {
+                // Calculate average predicted demand
+                const total = data.predictions.reduce((sum, day) => sum + day.amount, 0);
+                const avg = total / data.predictions.length;
+                
+                // Simple logic for user-friendly text
+                let message = "";
+                if(avg > 750000) {
+                    message = "High water demand predicted for the next 7 days in your area. Please use water conservatively.";
+                    insightIcon.className = "bi bi-exclamation-triangle-fill fs-3";
+                    insightIcon.parentElement.classList.replace('bg-primary', 'bg-warning');
+                } else if(avg < 400000) {
+                    message = "Low water demand predicted. Supply is abundant and stable.";
+                    insightIcon.className = "bi bi-droplet-half fs-3";
+                    insightIcon.parentElement.classList.replace('bg-primary', 'bg-info');
+                } else {
+                    message = "Normal water demand predicted for the week. No disruptions expected.";
+                    insightIcon.className = "bi bi-check-circle-fill fs-3";
+                    insightIcon.parentElement.classList.replace('bg-primary', 'bg-success');
+                }
+                
+                // Animate text reveal
+                insightText.classList.remove('placeholder-glow');
+                insightText.innerHTML = `<span class="fade-in-text"><strong>Analysis Complete:</strong> ${message}</span>`;
+            } else {
+                insightText.classList.remove('placeholder-glow');
+                insightText.innerText = "AI temporarily offline.";
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching AI insights:', error);
+            insightText.classList.remove('placeholder-glow');
+            insightText.innerText = "AI insights unavailable.";
+        });
+
+        // 2. Smart Complaint Priority Analyzer (Debounced Input)
+        const descInput = document.getElementById('description');
+        const priorityBadge = document.getElementById('ai-priority-badge');
+        let timeout = null;
+
+        descInput.addEventListener('input', function() {
+            const text = this.value.trim();
+            
+            // Clear previous timeout
+            clearTimeout(timeout);
+            
+            if(text.length < 10) {
+                priorityBadge.style.opacity = '0';
+                setTimeout(() => priorityBadge.style.display = 'none', 300);
+                return;
+            }
+
+            // Show analyzing state
+            priorityBadge.style.display = 'inline-block';
+            // Force reflow for transition
+            priorityBadge.offsetHeight;
+            priorityBadge.style.opacity = '1';
+            priorityBadge.className = 'badge bg-secondary rounded-pill px-3 py-2 lh-sm transition-all text-white';
+            priorityBadge.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> AI Analyzing Priority...`;
+
+            // Wait 1 second after typing stops before calling API (Debounce)
+            timeout = setTimeout(() => {
+                fetch('/api/analyze_complaint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description: text })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        const prio = data.priority;
+                        let bgClass = 'bg-secondary';
+                        let icon = 'bi-info-circle';
+                        
+                        if(prio === 'High') { bgClass = 'bg-danger'; icon = 'bi-exclamation-octagon'; }
+                        else if(prio === 'Medium') { bgClass = 'bg-warning text-dark'; icon = 'bi-exclamation-triangle'; }
+                        else if(prio === 'Low') { bgClass = 'bg-success'; icon = 'bi-check-circle'; }
+
+                        priorityBadge.className = `badge ${bgClass} rounded-pill px-3 py-2 lh-sm transition-all shadow-sm`;
+                        priorityBadge.innerHTML = `<i class="bi ${icon} me-1"></i> Estimated AI Priority: <strong>${prio}</strong>`;
+                    }
+                })
+                .catch(err => console.error(err));
+            }, 1000);
+        });
+    });
+</script>
+
+<style>
+    .fade-in-text {
+        animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+</style>
 </div>
 </div>
 {% endblock %}

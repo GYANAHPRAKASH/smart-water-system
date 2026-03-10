@@ -3,8 +3,8 @@ from flask import Blueprint, jsonify, request
 import asyncio
 import random
 from datetime import datetime
-from . import mongo
-from .ai_module import analyze_complaint, predict_demand
+from app import mongo
+from app.ai_module import analyze_complaint, predict_demand
 
 api = Blueprint('api', __name__)
 

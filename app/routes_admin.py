@@ -63,7 +63,7 @@ def dashboard():
         # Jinja uses c.id, we can provide c['id'] because Jinja handles dict keys like attributes
         c['id'] = str(c['_id'])
         if c.get('status') != 'Resolved':
-            active_complaints_count = active_complaints_count + 1
+            active_complaints_count += 1
         complaints.append(c)
     
     # Schedules
@@ -115,7 +115,7 @@ def dashboard():
         for c in active_complaints:
             u_data = mongo.db.users.find_one({'_id': c['user_id']})
             if u_data and u_data.get('colony') == col:
-                critical_issues = critical_issues + 1
+                critical_issues += 1
                 
         map_data.append({
             'colony': col,
