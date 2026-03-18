@@ -1,56 +1,93 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
-    <div class="col-md-9 col-lg-7">
-        <div class="card glass-card border-0 p-4 shadow-lg hover-lift">
+<div class="row justify-content-center align-items-center" style="min-height: 75vh; padding-top: 1rem;">
+    <div class="col-md-9 col-lg-7 fade-in-up">
+        <div class="card glass-card border-0 p-3 shadow-lg">
             <div class="card-body p-md-4">
+
+                <!-- Header -->
                 <div class="text-center mb-4">
-                    <div class="d-inline-flex rounded-circle p-3 mb-3 shadow-sm" style="background-color: var(--aqua-light);">
+                    <div class="d-inline-flex rounded-circle p-3 mb-3 shadow-sm"
+                        style="background: linear-gradient(135deg, var(--aqua-light), rgba(144,224,239,0.4));">
                         <i class="bi bi-person-plus-fill fs-1 text-primary"></i>
                     </div>
-                    <h3 class="fw-bold" style="color: var(--deep-ocean);">Create Account</h3>
-                    <p class="text-muted">Join the AquaFlow community today</p>
+                    <h3 class="fw-bold mb-1" style="color: var(--deep-ocean);">Create Account</h3>
+                    <p class="text-muted mb-0" style="font-size: 0.92rem;">
+                        Join the AquaFlow community today
+                    </p>
                 </div>
-                <form method="POST">
-                    <div class="row g-3">
+
+                <form method="POST" novalidate>
+                    <!-- Section: Personal Info -->
+                    <p class="text-muted fw-bold mb-3 small text-uppercase" style="letter-spacing: 0.8px;">
+                        <i class="bi bi-person-circle me-1 text-primary"></i> Personal Info
+                    </p>
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+                                <input type="text" class="form-control" id="first_name" name="first_name"
+                                    placeholder="First Name" required>
                                 <label for="first_name" class="text-muted">First Name</label>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                                <input type="text" class="form-control" id="last_name" name="last_name"
+                                    placeholder="Last Name" required>
                                 <label for="last_name" class="text-muted">Last Name</label>
                             </div>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
-                                <label for="username" class="text-muted"><i class="bi bi-person me-2"></i>Username</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                                <label for="password" class="text-muted"><i class="bi bi-lock me-2"></i>Password</label>
-                            </div>
-                        </div>
-                        
                         <div class="col-md-12">
                             <div class="form-floating">
-                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Phone Number" required>
-                                <label for="phone" class="text-muted"><i class="bi bi-telephone me-2"></i>Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                    placeholder="Phone Number" required>
+                                <label for="phone" class="text-muted">
+                                    <i class="bi bi-telephone me-1"></i> Phone Number
+                                </label>
                             </div>
                         </div>
-                        
+                    </div>
+
+                    <hr class="opacity-15 mb-3">
+
+                    <!-- Section: Account Credentials -->
+                    <p class="text-muted fw-bold mb-3 small text-uppercase" style="letter-spacing: 0.8px;">
+                        <i class="bi bi-shield-lock me-1 text-primary"></i> Account Credentials
+                    </p>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="username" name="username"
+                                    placeholder="Username" required autocomplete="username">
+                                <label for="username" class="text-muted">
+                                    <i class="bi bi-person me-1"></i> Username
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="password" name="password"
+                                    placeholder="Password" required autocomplete="new-password">
+                                <label for="password" class="text-muted">
+                                    <i class="bi bi-lock me-1"></i> Password
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="opacity-15 mb-3">
+
+                    <!-- Section: Address -->
+                    <p class="text-muted fw-bold mb-3 small text-uppercase" style="letter-spacing: 0.8px;">
+                        <i class="bi bi-house me-1 text-primary"></i> Address
+                    </p>
+                    <div class="row g-3 mb-4">
                         <div class="col-md-5">
                             <div class="form-floating">
-                                <input type="text" class="form-control" id="door_no" name="door_no" placeholder="Door No" required>
-                                <label for="door_no" class="text-muted"><i class="bi bi-house me-2"></i>Door Number</label>
+                                <input type="text" class="form-control" id="door_no" name="door_no"
+                                    placeholder="Door No" required>
+                                <label for="door_no" class="text-muted">Door Number</label>
                             </div>
                         </div>
                         <div class="col-md-7">
@@ -63,18 +100,30 @@
                                     <option value="Alwarpet">Alwarpet</option>
                                     <option value="Gopalapuram">Gopalapuram</option>
                                 </select>
-                                <label for="colony" class="text-muted"><i class="bi bi-geo-alt me-2"></i>Colony Name</label>
+                                <label for="colony" class="text-muted">
+                                    <i class="bi bi-geo-alt me-1"></i> Colony Name
+                                </label>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="d-grid gap-2 mt-5">
-                        <button type="submit" class="btn btn-aqua btn-lg rounded-pill fw-bold shadow">Register Account <i class="bi bi-check-circle ms-2"></i></button>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-aqua btn-lg rounded-pill fw-bold shadow">
+                            <i class="bi bi-check-circle me-2"></i> Register Account
+                        </button>
                     </div>
                 </form>
-                <div class="text-center mt-4">
-                    <p class="text-muted mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-primary fw-bold text-decoration-none nav-hover">Login here</a></p>
+
+                <hr class="my-4 opacity-25">
+
+                <div class="text-center">
+                    <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                        Already have an account?
+                        <a href="{{ url_for('auth.login') }}"
+                            class="text-primary fw-bold text-decoration-none nav-hover ms-1">Login here</a>
+                    </p>
                 </div>
+
             </div>
         </div>
     </div>

@@ -1,35 +1,60 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center align-items-center" style="min-height: 65vh;">
-    <div class="col-md-6 col-lg-4">
-        <div class="card glass-card border-0 p-4 shadow-lg hover-lift">
+<div class="row justify-content-center align-items-center" style="min-height: 68vh;">
+    <div class="col-md-6 col-lg-4 fade-in-up">
+        <div class="card glass-card border-0 p-3 shadow-lg">
             <div class="card-body py-4">
+                <!-- Header -->
                 <div class="text-center mb-4">
-                    <div class="d-inline-flex rounded-circle p-3 mb-3 shadow-sm" style="background-color: var(--aqua-light);">
-                        <i class="bi bi-person-circle fs-1 text-primary"></i>
+                    <div class="d-inline-flex rounded-circle p-3 mb-3 shadow-sm animate-float"
+                        style="background: linear-gradient(135deg, var(--aqua-light), rgba(144,224,239,0.4));">
+                        <i class="bi bi-droplet-half fs-1 text-primary"></i>
                     </div>
-                    <h3 class="fw-bold" style="color: var(--deep-ocean);">Welcome Back</h3>
-                    <p class="text-muted">Sign in to your AquaFlow account</p>
+                    <h3 class="fw-bold mb-1" style="color: var(--deep-ocean);">Welcome Back</h3>
+                    <p class="text-muted mb-0" style="font-size: 0.92rem;">Sign in to your AquaFlow account</p>
                 </div>
+
+                <!-- Form -->
                 <form method="POST">
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
-                        <label for="username" class="text-muted"><i class="bi bi-person me-2"></i>Username</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                            placeholder="Username" required autocomplete="username">
+                        <label for="username" class="text-muted">
+                            <i class="bi bi-person me-1"></i> Username
+                        </label>
                     </div>
                     <div class="form-floating mb-4">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                        <label for="password" class="text-muted"><i class="bi bi-lock me-2"></i>Password</label>
+                        <input type="password" class="form-control" id="password" name="password"
+                            placeholder="Password" required autocomplete="current-password">
+                        <label for="password" class="text-muted">
+                            <i class="bi bi-lock me-1"></i> Password
+                        </label>
                     </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-aqua btn-lg rounded-pill fw-bold shadow">Login <i class="bi bi-box-arrow-in-right ms-2"></i></button>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-aqua btn-lg rounded-pill fw-bold shadow">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Login
+                        </button>
                     </div>
                 </form>
-                <div class="text-center mt-4">
-                    <p class="text-muted mb-0">Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-primary fw-bold text-decoration-none nav-hover">Register here</a></p>
+
+                <hr class="my-4 opacity-25">
+
+                <div class="text-center">
+                    <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                        Don't have an account?
+                        <a href="{{ url_for('auth.register') }}"
+                            class="text-primary fw-bold text-decoration-none nav-hover ms-1">Register here</a>
+                    </p>
                 </div>
             </div>
         </div>
+
+        <!-- Info note -->
+        <p class="text-center text-muted small mt-3">
+            <i class="bi bi-info-circle me-1"></i>
+            New accounts require admin approval before first login.
+        </p>
     </div>
 </div>
 {% endblock %}

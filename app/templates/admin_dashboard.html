@@ -141,6 +141,42 @@
                 </div>
             </div>
         </div>
+
+        <!-- Colony Status Overview -->
+        <div class="row mb-5 g-3">
+            <div class="col-12">
+                <div class="card glass-card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
+                        <h5 class="fw-bold mb-0" style="color: var(--deep-ocean);">
+                            <i class="bi bi-map-fill text-primary me-2"></i> Colony Status Overview
+                        </h5>
+                        <span class="badge bg-primary rounded-pill px-3">Live</span>
+                    </div>
+                    <div class="card-body px-4 pb-4">
+                        <div class="row g-3">
+                            {% for col_data in map_data %}
+                            <div class="col-md-4 col-lg-2" style="min-width: 200px;">
+                                <div class="colony-status-card">
+                                    <div class="colony-dot" style="background-color: {{ '#198754' if col_data.status == 'Supply' else ('#dc3545' if col_data.status == 'Shutdown' else '#6c757d') }};"></div>
+                                    <div>
+                                        <p class="fw-bold mb-0 small" style="color: var(--deep-ocean);">{{ col_data.colony }}</p>
+                                        <span class="badge rounded-pill px-2 py-1" style="font-size: 0.72rem; background-color: {{ '#d1e7dd' if col_data.status == 'Supply' else ('#f8d7da' if col_data.status == 'Shutdown' else '#e2e3e5') }}; color: {{ '#146c43' if col_data.status == 'Supply' else ('#842029' if col_data.status == 'Shutdown' else '#41464b') }};">
+                                            {{ col_data.status }}
+                                        </span>
+                                        {% if col_data.critical_issues > 0 %}
+                                        <br><small class="text-danger fw-bold"><i class="bi bi-exclamation-circle me-1"></i>{{ col_data.critical_issues }} alert(s)</small>
+                                        {% else %}
+                                        <br><small class="text-success"><i class="bi bi-check-circle me-1"></i>No alerts</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Water Schedule Tab -->
@@ -388,7 +424,6 @@
                     <input type="text" class="form-control rounded-pill mb-3" name="notes"
                         placeholder="Notes (Optional)">
                     <button type="submit" class="btn btn-aqua rounded-pill w-100">Confirm Schedule</button>
-                </form>
                 </form>
             </div>
         </div>

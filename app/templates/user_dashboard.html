@@ -1,30 +1,39 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row mb-5 align-items-center">
+<!-- Page Header -->
+<div class="row mb-4 align-items-center fade-in-up">
     <div class="col-md-12">
         <h2 class="display-6 fw-bold text-gradient mb-3">Resident Dashboard</h2>
         <div class="glass-card p-3 d-flex flex-wrap align-items-center gap-3 shadow-sm border-0">
+            <!-- Name -->
             <div class="d-flex align-items-center border-end pe-3">
-                <div class="bg-light rounded-circle p-2 me-2 shadow-sm text-primary">
-                    <i class="bi bi-person-fill fs-4"></i>
+                <div class="rounded-circle p-2 me-2 shadow-sm text-primary"
+                    style="background: var(--aqua-light); width:44px; height:44px; display:flex; align-items:center; justify-content:center;">
+                    <i class="bi bi-person-fill fs-5"></i>
                 </div>
                 <div>
-                   <p class="text-muted mb-0 small text-uppercase fw-bold" style="letter-spacing: 1px;">Welcome Back</p>
-                   <h5 class="fw-bold mb-0" style="color: var(--deep-ocean);">{{ current_user.first_name }}</h5>
+                    <p class="text-muted mb-0 small fw-bold text-uppercase" style="letter-spacing: 1px; font-size: 0.72rem;">Welcome Back</p>
+                    <h5 class="fw-bold mb-0" style="color: var(--deep-ocean);">{{ current_user.first_name }} {{ current_user.last_name }}</h5>
                 </div>
             </div>
-            
+            <!-- Colony -->
             <div class="d-flex align-items-center border-end pe-3">
-                <span class="badge bg-success bg-gradient rounded-pill px-3 py-2 shadow-sm" style="font-size: 0.95rem;">
-                    <i class="bi bi-coin me-1"></i> Balance: {{ current_user.credits }} Credits
+                <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+                <span class="fw-medium" style="color: var(--deep-ocean);">{{ current_user.colony }}</span>
+            </div>
+            <!-- Credits -->
+            <div class="d-flex align-items-center">
+                <span class="badge bg-success bg-gradient rounded-pill px-3 py-2 shadow-sm" style="font-size: 0.92rem;">
+                    <i class="bi bi-coin me-1"></i> {{ current_user.credits }} Credits
                 </span>
             </div>
-            
+            <!-- Top User Badge -->
             {% if is_top_user %}
-            <div class="d-flex align-items-center">
-                <span class="badge bg-warning text-dark bg-gradient rounded-pill px-3 py-2 shadow-sm animate-float" style="font-size: 0.95rem; border: 1px solid rgba(255,193,7,0.5);">
-                    <i class="bi bi-star-fill text-dark me-1"></i> Top Contributor: <strong>50% Bill Discount</strong>
+            <div class="d-flex align-items-center ms-auto">
+                <span class="badge bg-warning text-dark bg-gradient rounded-pill px-3 py-2 shadow-sm animate-float"
+                    style="font-size: 0.92rem; border: 1px solid rgba(255,193,7,0.4);">
+                    <i class="bi bi-star-fill text-dark me-1"></i> Top Contributor — <strong>50% Bill Discount</strong>
                 </span>
             </div>
             {% endif %}
@@ -32,28 +41,33 @@
     </div>
 </div>
 
-<!-- AI Predictive Insights Widget -->
+<!-- AI Insights Banner -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card glass-card border-0 shadow-sm overflow-hidden" style="background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,248,255,0.9));">
+        <div class="card glass-card ai-insight-card border-0 shadow-sm overflow-hidden">
             <div class="card-body p-4 d-flex align-items-center justify-content-between position-relative">
-                <!-- Decorative background icon -->
-                <i class="bi bi-robot text-primary opacity-10 position-absolute end-0 top-50 translate-middle-y" style="font-size: 8rem; margin-right: -2rem;"></i>
-                
+                <!-- Decorative icon -->
+                <i class="bi bi-robot text-primary opacity-10 position-absolute end-0 top-50 translate-middle-y"
+                    style="font-size: 7rem; margin-right: -1.5rem; pointer-events: none;"></i>
+
                 <div class="d-flex align-items-center z-1 w-100">
-                    <div class="bg-primary text-white rounded-circle p-3 me-3 shadow d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <div class="text-white rounded-circle p-3 me-3 shadow d-flex align-items-center justify-content-center flex-shrink-0"
+                        id="ai-icon-wrapper"
+                        style="width: 58px; height: 58px; background: linear-gradient(135deg, var(--aqua-primary), var(--aqua-secondary));">
                         <i class="bi bi-stars fs-3" id="ai-insight-icon"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <h5 class="fw-bold mb-1" style="color: var(--deep-ocean);">AI Insights for {{ current_user.colony }}</h5>
+                        <h6 class="fw-bold mb-1" style="color: var(--deep-ocean);">
+                            AI Insights &mdash; {{ current_user.colony }}
+                        </h6>
                         <p id="ai-insight-text" class="text-muted mb-0 placeholder-glow">
                             <span class="placeholder col-8 rounded"></span>
                         </p>
                     </div>
-                    <div class="ms-3 z-1">
-                         <span class="badge bg-light text-primary border border-primary rounded-pill px-3 py-2 shadow-sm">
-                            <i class="bi bi-cpu me-1"></i> Phase 2 AI Core
-                         </span>
+                    <div class="ms-3 flex-shrink-0">
+                        <span class="badge bg-white text-primary border border-primary rounded-pill px-3 py-2 shadow-sm" style="font-size: 0.78rem;">
+                            <i class="bi bi-cpu me-1"></i> AI Core Active
+                        </span>
                     </div>
                 </div>
             </div>
@@ -61,15 +75,20 @@
     </div>
 </div>
 
+<!-- Main Grid -->
 <div class="row g-4">
-    <!-- Left Column: Report Issue & History -->
-    <div class="col-md-7 mb-4">
-        <!-- New Complaint Form -->
+    <!-- Left: Report & History -->
+    <div class="col-md-7">
+
+        <!-- Report Form -->
         <div class="card glass-card border-0 mb-4 shadow-sm">
-            <div class="card-header bg-transparent border-0 pt-4 pb-2">
-                <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-megaphone-fill text-primary me-2"></i> Report an Issue</h5>
+            <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
+                <h5 class="fw-bold mb-0" style="color: var(--deep-ocean);">
+                    <i class="bi bi-megaphone-fill text-primary me-2"></i> Report an Issue
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Your description is analyzed by AI to set priority.</p>
             </div>
-            <div class="card-body">
+            <div class="card-body px-4 pb-4">
                 <form action="{{ url_for('user.submit_complaint') }}" method="POST">
                     <div class="form-floating mb-3">
                         <select class="form-select" id="type" name="type" required>
@@ -82,39 +101,54 @@
                         </select>
                         <label for="type" class="text-muted">Issue Type</label>
                     </div>
-                    <div class="form-floating mb-4">
-                        <textarea class="form-control" id="description" name="description" style="height: 100px" 
-                            placeholder="Describe the issue... e.g., 'Severe pipe burst causing flooding'"
+                    <div class="form-floating mb-2">
+                        <textarea class="form-control" id="description" name="description"
+                            style="height: 110px"
+                            placeholder="Describe the issue..."
                             required></textarea>
-                        <label for="description" class="text-muted">Description (AI Analyzed for Priority)</label>
-                        <div class="mt-2 text-end">
-                            <small id="ai-priority-badge" class="badge bg-secondary rounded-pill px-3 py-2 lh-sm transition-all" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
-                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Analyzing...
-                            </small>
-                        </div>
+                        <label for="description" class="text-muted">Description (AI Analyzed)</label>
                     </div>
-                    <button type="submit" class="btn btn-aqua btn-lg rounded-pill w-100 shadow fw-bold"><i class="bi bi-send-fill me-2"></i>Submit Report</button>
+                    <!-- AI Priority Preview Badge -->
+                    <div class="text-end mb-3" style="min-height: 30px;">
+                        <small id="ai-priority-badge" class="badge bg-secondary rounded-pill px-3 py-2 lh-sm transition-all" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span> Analyzing...
+                        </small>
+                    </div>
+                    <button type="submit" class="btn btn-aqua btn-lg rounded-pill w-100 shadow fw-bold">
+                        <i class="bi bi-send-fill me-2"></i> Submit Report
+                    </button>
                 </form>
             </div>
         </div>
 
         <!-- Complaint History -->
         <div class="card glass-card border-0 shadow-sm">
-            <div class="card-header bg-transparent border-0 pt-4 pb-2">
-                <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-journal-text text-primary me-2"></i> My Reports</h5>
+            <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
+                <h5 class="fw-bold mb-0" style="color: var(--deep-ocean);">
+                    <i class="bi bi-journal-text text-primary me-2"></i> My Reports
+                </h5>
+                <span class="badge bg-light text-primary border border-primary rounded-pill px-3 py-1 shadow-sm">
+                    {{ complaints|length }} total
+                </span>
             </div>
-            <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+            <div class="card-body px-4 pb-4" style="max-height: 420px; overflow-y: auto;">
                 {% if complaints %}
                 {% for complaint in complaints %}
-                <div class="p-3 mb-3 border-0 rounded-4 bg-white shadow-sm position-relative overflow-hidden" style="opacity: 0.95;">
-                    <div class="position-absolute top-0 start-0 w-100 bg-{{ 'danger' if complaint.priority == 'High' else ('warning' if complaint.priority == 'Medium' else 'success') }}" style="height: 4px;"></div>
+                <div class="p-3 mb-3 border-0 rounded-4 bg-white shadow-sm position-relative overflow-hidden
+                    priority-strip-{{ 'high' if complaint.priority == 'High' else ('medium' if complaint.priority == 'Medium' else 'low') }}">
                     <div class="d-flex justify-content-between align-items-center mb-2 mt-1">
-                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-tag-fill text-muted me-1"></i> {{ complaint.type }}</h6>
-                        <span class="badge bg-{{ 'danger' if complaint.priority == 'High' else ('warning' if complaint.priority == 'Medium' else 'success') }} rounded-pill">{{ complaint.priority }} Priority</span>
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-tag-fill text-muted me-1"></i> {{ complaint.type }}
+                        </h6>
+                        <span class="badge bg-{{ 'danger' if complaint.priority == 'High' else ('warning' if complaint.priority == 'Medium' else 'success') }} rounded-pill">
+                            {{ complaint.priority }} Priority
+                        </span>
                     </div>
-                    <p class="small text-muted mb-3 pb-2 border-bottom">{{ complaint.description }}</p>
+                    <p class="small text-muted mb-2 pb-2 border-bottom">{{ complaint.description }}</p>
                     <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-secondary fw-medium"><i class="bi bi-clock me-1"></i>{{ complaint.created_at.strftime('%b %d, %Y - %I:%M %p') }}</small>
+                        <small class="text-secondary fw-medium">
+                            <i class="bi bi-clock me-1"></i>{{ complaint.created_at.strftime('%b %d, %Y — %I:%M %p') }}
+                        </small>
                         <span class="badge bg-{{ 'success' if complaint.status == 'Resolved' else 'secondary' }} rounded-pill">
                             <i class="bi bi-{{ 'check-circle' if complaint.status == 'Resolved' else 'clock-history' }} me-1"></i>{{ complaint.status }}
                         </span>
@@ -122,23 +156,29 @@
                 </div>
                 {% endfor %}
                 {% else %}
-                <div class="text-center p-4">
+                <div class="text-center py-5">
                     <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-                    <p class="text-muted mt-2">No reports history found.</p>
+                    <p class="text-muted mt-2 mb-0">No reports submitted yet.</p>
+                    <small class="text-muted">Use the form above to report an issue.</small>
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Right Column: Schedule & Status -->
-    <div class="col-md-5 mb-4">
+    <!-- Right: Calendar -->
+    <div class="col-md-5">
         <div class="card glass-card border-0 h-100 shadow-sm">
-            <div class="card-header bg-transparent border-0 pt-4 pb-2">
-                <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-calendar-event text-primary me-2"></i> Water Schedule ({{ current_user.colony }})</h5>
+            <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
+                <h5 class="fw-bold mb-0" style="color: var(--deep-ocean);">
+                    <i class="bi bi-calendar-event text-primary me-2"></i> Water Schedule
+                </h5>
+                <p class="text-muted small mb-0 mt-1">
+                    <i class="bi bi-geo-alt me-1"></i>{{ current_user.colony }}
+                </p>
             </div>
-            <div class="card-body">
-                <div id='user-calendar' class="bg-white rounded-4 p-3 shadow-sm" style="opacity: 0.95;"></div>
+            <div class="card-body px-3 pb-3">
+                <div id='user-calendar' class="bg-white rounded-4 p-2 shadow-sm" style="opacity: 0.97;"></div>
             </div>
         </div>
     </div>
@@ -154,10 +194,13 @@
             </div>
             <div class="modal-body pb-4">
                 <div class="bg-white rounded-4 p-3 shadow-sm">
-                    <p class="mb-2"><strong><i class="bi bi-clock-fill text-primary me-2"></i>Time:</strong> <span id="eventTime" class="text-dark fw-medium"></span></p>
-                    <p class="mb-2 d-flex align-items-center"><strong><i class="bi bi-activity text-primary me-2"></i>Status:</strong> <span id="eventStatus" class="badge ms-2 rounded-pill px-3"></span></p>
+                    <p class="mb-2"><strong><i class="bi bi-clock-fill text-primary me-2"></i>Time:</strong>
+                        <span id="eventTime" class="text-dark fw-medium"></span></p>
+                    <p class="mb-2 d-flex align-items-center"><strong><i class="bi bi-activity text-primary me-2"></i>Status:</strong>
+                        <span id="eventStatus" class="badge ms-2 rounded-pill px-3"></span></p>
                     <hr class="text-muted opacity-25">
-                    <p class="mb-0"><strong><i class="bi bi-card-text text-primary me-2"></i>Notes:</strong> <span id="eventNotes" class="text-muted"></span></p>
+                    <p class="mb-0"><strong><i class="bi bi-card-text text-primary me-2"></i>Notes:</strong>
+                        <span id="eventNotes" class="text-muted"></span></p>
                 </div>
             </div>
         </div>
@@ -169,145 +212,129 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('user-calendar');
-
-        // Safe JSON injection
         const schedules = {{ schedules_data | tojson }};
-    const events = schedules.map(schedule => ({
-        title: schedule.action,
-        start: schedule.date_time,
-        backgroundColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
-        borderColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
-        extendedProps: {
-            notes: schedule.notes || '',
-            time: schedule.time_str,
-            status: schedule.action
-        }
-    }));
+        const events = schedules.map(schedule => ({
+            title: schedule.action,
+            start: schedule.date_time,
+            backgroundColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
+            borderColor: schedule.action === "Supply" ? "#198754" : "#dc3545",
+            extendedProps: {
+                notes: schedule.notes || '',
+                time: schedule.time_str,
+                status: schedule.action
+            }
+        }));
 
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
-            left: 'prev,next',
-            center: 'title',
-            right: 'dayGridMonth,listWeek'
-        },
-        height: 'auto', // Let it breathe
-        displayEventTime: false, // Hide time
-        eventDisplay: 'block', // Solid blocks
-        events: events,
-        eventClick: function (info) {
-            var props = info.event.extendedProps;
-            document.getElementById('eventTitle').innerText = info.event.title;
-            document.getElementById('eventTime').innerText = info.event.start.toLocaleDateString() + ' ' + props.time;
-
-            var badge = document.getElementById('eventStatus');
-            badge.innerText = props.status;
-            badge.className = 'badge ' + (props.status === 'Supply' ? 'bg-success' : 'bg-danger');
-
-            document.getElementById('eventNotes').innerText = props.notes || 'No additional notes.';
-
-            new bootstrap.Modal(document.getElementById('eventModal')).show();
-        }
-    });
-    calendar.render();
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next',
+                center: 'title',
+                right: 'dayGridMonth,listWeek'
+            },
+            height: 'auto',
+            displayEventTime: false,
+            eventDisplay: 'block',
+            events: events,
+            eventClick: function (info) {
+                var props = info.event.extendedProps;
+                document.getElementById('eventTitle').innerText = info.event.title;
+                document.getElementById('eventTime').innerText =
+                    info.event.start.toLocaleDateString() + ' ' + props.time;
+                var badge = document.getElementById('eventStatus');
+                badge.innerText = props.status;
+                badge.className = 'badge ' + (props.status === 'Supply' ? 'bg-success' : 'bg-danger') + ' ms-2 rounded-pill px-3';
+                document.getElementById('eventNotes').innerText = props.notes || 'No additional notes.';
+                new bootstrap.Modal(document.getElementById('eventModal')).show();
+            }
+        });
+        calendar.render();
     });
 </script>
 
-<!-- Native AI Integration Scripts -->
+<!-- AI Integration Scripts -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // 1. AI Predictive Insights Widget (On Load Async Call)
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. AI Predictive Insights (on load)
         const colony = "{{ current_user.colony }}";
         const insightText = document.getElementById('ai-insight-text');
         const insightIcon = document.getElementById('ai-insight-icon');
-        
+        const iconWrapper = document.getElementById('ai-icon-wrapper');
+
         fetch('/api/predict_demand', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ colony: colony })
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
-            if(data.status === 'success' && data.predictions && data.predictions.length > 0) {
-                // Calculate average predicted demand
-                const total = data.predictions.reduce((sum, day) => sum + day.amount, 0);
-                const avg = total / data.predictions.length;
-                
-                // Simple logic for user-friendly text
-                let message = "";
-                if(avg > 750000) {
-                    message = "High water demand predicted for the next 7 days in your area. Please use water conservatively.";
+            if (data.status === 'success' && data.predictions && data.predictions.length > 0) {
+                const avg = data.predictions.reduce((s, d) => s + d.amount, 0) / data.predictions.length;
+                let message = '', gradient = '';
+
+                if (avg > 750000) {
+                    message = "High water demand predicted for the next 7 days. Please use water conservatively.";
                     insightIcon.className = "bi bi-exclamation-triangle-fill fs-3";
-                    insightIcon.parentElement.classList.replace('bg-primary', 'bg-warning');
-                } else if(avg < 400000) {
+                    gradient = "linear-gradient(135deg, #d97706, #f59e0b)";
+                } else if (avg < 400000) {
                     message = "Low water demand predicted. Supply is abundant and stable.";
                     insightIcon.className = "bi bi-droplet-half fs-3";
-                    insightIcon.parentElement.classList.replace('bg-primary', 'bg-info');
+                    gradient = "linear-gradient(135deg, #0ea5e9, #38bdf8)";
                 } else {
                     message = "Normal water demand predicted for the week. No disruptions expected.";
                     insightIcon.className = "bi bi-check-circle-fill fs-3";
-                    insightIcon.parentElement.classList.replace('bg-primary', 'bg-success');
+                    gradient = "linear-gradient(135deg, #059669, #34d399)";
                 }
-                
-                // Animate text reveal
+                iconWrapper.style.background = gradient;
                 insightText.classList.remove('placeholder-glow');
                 insightText.innerHTML = `<span class="fade-in-text"><strong>Analysis Complete:</strong> ${message}</span>`;
             } else {
                 insightText.classList.remove('placeholder-glow');
-                insightText.innerText = "AI temporarily offline.";
+                insightText.innerText = "AI insights currently unavailable.";
             }
         })
-        .catch(error => {
-            console.error('Error fetching AI insights:', error);
+        .catch(() => {
             insightText.classList.remove('placeholder-glow');
             insightText.innerText = "AI insights unavailable.";
         });
 
-        // 2. Smart Complaint Priority Analyzer (Debounced Input)
+        // 2. Debounced Complaint Priority Analyzer
         const descInput = document.getElementById('description');
         const priorityBadge = document.getElementById('ai-priority-badge');
-        let timeout = null;
+        let debounceTimer = null;
 
-        descInput.addEventListener('input', function() {
+        descInput.addEventListener('input', function () {
             const text = this.value.trim();
-            
-            // Clear previous timeout
-            clearTimeout(timeout);
-            
-            if(text.length < 10) {
+            clearTimeout(debounceTimer);
+
+            if (text.length < 10) {
                 priorityBadge.style.opacity = '0';
                 setTimeout(() => priorityBadge.style.display = 'none', 300);
                 return;
             }
 
-            // Show analyzing state
             priorityBadge.style.display = 'inline-block';
-            // Force reflow for transition
-            priorityBadge.offsetHeight;
+            priorityBadge.offsetHeight; // force reflow
             priorityBadge.style.opacity = '1';
-            priorityBadge.className = 'badge bg-secondary rounded-pill px-3 py-2 lh-sm transition-all text-white';
-            priorityBadge.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> AI Analyzing Priority...`;
+            priorityBadge.className = 'badge bg-secondary rounded-pill px-3 py-2 lh-sm transition-all';
+            priorityBadge.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> AI Analyzing...`;
 
-            // Wait 1 second after typing stops before calling API (Debounce)
-            timeout = setTimeout(() => {
+            debounceTimer = setTimeout(() => {
                 fetch('/api/analyze_complaint', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ description: text })
                 })
-                .then(res => res.json())
+                .then(r => r.json())
                 .then(data => {
-                    if(data.status === 'success') {
+                    if (data.status === 'success') {
                         const prio = data.priority;
-                        let bgClass = 'bg-secondary';
-                        let icon = 'bi-info-circle';
-                        
-                        if(prio === 'High') { bgClass = 'bg-danger'; icon = 'bi-exclamation-octagon'; }
-                        else if(prio === 'Medium') { bgClass = 'bg-warning text-dark'; icon = 'bi-exclamation-triangle'; }
-                        else if(prio === 'Low') { bgClass = 'bg-success'; icon = 'bi-check-circle'; }
-
+                        let bgClass = 'bg-secondary', icon = 'bi-info-circle';
+                        if (prio === 'High')   { bgClass = 'bg-danger';          icon = 'bi-exclamation-octagon'; }
+                        else if (prio === 'Medium') { bgClass = 'bg-warning text-dark'; icon = 'bi-exclamation-triangle'; }
+                        else if (prio === 'Low')  { bgClass = 'bg-success';         icon = 'bi-check-circle'; }
                         priorityBadge.className = `badge ${bgClass} rounded-pill px-3 py-2 lh-sm transition-all shadow-sm`;
-                        priorityBadge.innerHTML = `<i class="bi ${icon} me-1"></i> Estimated AI Priority: <strong>${prio}</strong>`;
+                        priorityBadge.innerHTML = `<i class="bi ${icon} me-1"></i> AI Priority: <strong>${prio}</strong>`;
                     }
                 })
                 .catch(err => console.error(err));
@@ -315,19 +342,4 @@
         });
     });
 </script>
-
-<style>
-    .fade-in-text {
-        animation: fadeIn 0.5s ease-in;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .transition-all {
-        transition: all 0.3s ease;
-    }
-</style>
-</div>
-</div>
 {% endblock %}
