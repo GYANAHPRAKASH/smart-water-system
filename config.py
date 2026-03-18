@@ -3,7 +3,17 @@ import os
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-please-change'
-    MONGO_URI = os.environ.get('MONGO_URI') or 'mongodb://localhost:27017/smart_water_db'
+    
+    # Get URI from env, default to local if missing
+    _mongo_uri = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/smart_water_db')
+    
+    # If using Atlas and the user forgot to specify the database name before the query string, inject it
+    if 'mongodb.net/?' in _mongo_uri:
+        _mongo_uri = _mongo_uri.replace('mongodb.net/?', 'mongodb.net/smart_water_db?')
+    elif 'mongodb.net/' in _mongo_uri and not '?' in _mongo_uri and _mongo_uri.endswith('mongodb.net/'):
+        _mongo_uri += 'smart_water_db'
+        
+    MONGO_URI = _mongo_uri
 
     # Flask-Mail (Gmail SMTP)
     MAIL_SERVER   = 'smtp.gmail.com'
