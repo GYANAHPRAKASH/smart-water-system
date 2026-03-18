@@ -16,61 +16,73 @@ def load_user(user_id):
         pass
     return None
 
-# For Flask-Login to work with MongoDB, we need a custom User class
-# Since there is no SQLAlchemy `db.Model` anymore, we just wrap a dictionary
 class User(UserMixin):
     def __init__(self, user_dict):
         self.user_data = user_dict
-        # UserMixin expects `id` to be a string
         self.id = str(user_dict.get('_id'))
-        
+
     @property
     def username(self):
         return self.user_data.get('username')
-        
+
+    @property
+    def email(self):
+        return self.user_data.get('email')
+
+    @property
+    def google_id(self):
+        return self.user_data.get('google_id')
+
+    @property
+    def profile_complete(self):
+        """False if colony/phone/door_no are missing (new Google user)."""
+        return bool(
+            self.user_data.get('colony') and
+            self.user_data.get('phone') and
+            self.user_data.get('door_no')
+        )
+
     @property
     def role(self):
         return self.user_data.get('role', 'user')
-        
+
     @property
     def status(self):
         return self.user_data.get('status', 'pending')
-        
+
     @property
     def credits(self):
         return self.user_data.get('credits', 0)
-        
+
     @property
     def first_name(self):
         return self.user_data.get('first_name')
-        
+
     @property
     def last_name(self):
         return self.user_data.get('last_name')
-        
+
     @property
     def phone(self):
         return self.user_data.get('phone')
-        
+
     @property
     def door_no(self):
         return self.user_data.get('door_no')
-        
+
     @property
     def colony(self):
         return self.user_data.get('colony')
-        
+
     @property
     def password_hash(self):
         return self.user_data.get('password_hash')
 
     def check_password(self, password):
+        if not self.password_hash:
+            return False
         return check_password_hash(self.password_hash, password)
-        
+
     @staticmethod
     def generate_hash(password):
         return generate_password_hash(password)
-
-# No other classes are STRICTLY required because MongoDB is schema-less.
-# We will just insert dictionaries into collections like `mongo.db.complaints`.
-# However, you could define factory functions here if you wanted to strictly format dicts.

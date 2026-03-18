@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 72vh;">
+    <div class="col-md-7 col-lg-5 fade-in-up">
+        <div class="card glass-card border-0 p-3 shadow-lg">
+            <div class="card-body py-4">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex rounded-circle p-3 mb-3 shadow-sm"
+                        style="background: linear-gradient(135deg, var(--aqua-light), rgba(144,224,239,0.4));">
+                        <i class="bi bi-person-check-fill fs-1 text-primary"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1" style="color: var(--deep-ocean);">Complete Your Profile</h3>
+                    <p class="text-muted mb-0" style="font-size: 0.92rem;">
+                        Almost there, <strong>{{ current_user.first_name }}</strong>! We just need a few more details.
+                    </p>
+                </div>
+
+                <div class="alert alert-info border-0 rounded-3 mb-4" style="background: rgba(13,202,240,0.1); font-size: 0.88rem;">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    After completing your profile, an admin will review and approve your account. You'll receive an email when approved.
+                </div>
+
+                <form method="POST">
+                    <p class="text-muted fw-bold mb-3 small text-uppercase" style="letter-spacing: 0.8px;">
+                        <i class="bi bi-house me-1 text-primary"></i> Address Details
+                    </p>
+                    <div class="form-floating mb-3">
+                        <input type="tel" class="form-control" id="phone" name="phone"
+                            placeholder="Phone Number" required>
+                        <label for="phone" class="text-muted">
+                            <i class="bi bi-telephone me-1"></i> Phone Number
+                        </label>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-5">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="door_no" name="door_no"
+                                    placeholder="Door No" required>
+                                <label for="door_no" class="text-muted">Door Number</label>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-floating">
+                                <select class="form-select" id="colony" name="colony" required>
+                                    <option value="" disabled selected>Select your colony</option>
+                                    <option value="Anna Nagar">Anna Nagar</option>
+                                    <option value="Nungambakkam">Nungambakkam</option>
+                                    <option value="T. Nagar">T. Nagar</option>
+                                    <option value="Alwarpet">Alwarpet</option>
+                                    <option value="Gopalapuram">Gopalapuram</option>
+                                </select>
+                                <label for="colony" class="text-muted">
+                                    <i class="bi bi-geo-alt me-1"></i> Colony Name
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-aqua btn-lg rounded-pill fw-bold shadow">
+                            <i class="bi bi-check-circle me-2"></i> Submit for Approval
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

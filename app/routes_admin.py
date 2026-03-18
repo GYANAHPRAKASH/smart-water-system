@@ -6,6 +6,7 @@ from .models import User
 from datetime import datetime
 from bson.objectid import ObjectId
 from .ai_module import analyze_complaint, generate_simulated_data, predict_demand, detect_anomalies
+from .mail_service import send_account_approved, send_account_rejected, send_complaint_resolved, send_schedule_alert
 
 admin = Blueprint('admin', __name__)
 
@@ -146,7 +147,10 @@ def approve_user(user_id):
     if current_user.role != 'admin':
         return redirect(url_for('user.dashboard'))
     
+    user_data = mongo.db.users.find_one({'_id': ObjectId(user_id)})
     mongo.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'status': 'approved'}})
+    if user_data:
+        send_account_approved(user_data.get('email'), user_data.get('username'))
     flash('User has been approved.', 'success')
     return redirect(url_for('admin.dashboard'))
 
@@ -156,7 +160,10 @@ def reject_user(user_id):
     if current_user.role != 'admin':
         return redirect(url_for('user.dashboard'))
     
+    user_data = mongo.db.users.find_one({'_id': ObjectId(user_id)})
     mongo.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'status': 'rejected'}})
+    if user_data:
+        send_account_rejected(user_data.get('email'), user_data.get('username'))
     flash('User has been rejected.', 'warning')
     return redirect(url_for('admin.dashboard'))
 
@@ -184,10 +191,12 @@ def resolve_complaint(complaint_id):
         user_id = complaint.get('user_id')
         if user_id:
             mongo.db.users.update_one({'_id': user_id}, {'$inc': {'credits': 10}})
-        
-        # Find username for flash
+
+        # Find user and send email
         user = mongo.db.users.find_one({'_id': user_id})
         uname = user.get('username') if user else 'User'
+        if user and user.get('email'):
+            send_complaint_resolved(user.get('email'), uname, credits_awarded=10)
         flash(f'Complaint resolved. 10 Credits awarded to {uname}.', 'success')
         
     return redirect(url_for('admin.dashboard'))
@@ -223,6 +232,12 @@ def schedule_supply():
         'notes': notes
     }
     mongo.db.schedules.insert_one(new_schedule)
+
+    # Email all approved users in this colony
+    colony_users = list(mongo.db.users.find({'colony': colony, 'status': 'approved', 'role': 'user'}))
+    emails = [u['email'] for u in colony_users if u.get('email')]
+    send_schedule_alert(emails, colony, action, date_time.strftime('%b %d, %Y at %I:%M %p'), notes or '')
+
     flash('Water schedule updated successfully.', 'success')
     return redirect(url_for('admin.dashboard'))
 

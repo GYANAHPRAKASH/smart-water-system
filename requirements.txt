@@ -5,3 +5,5 @@ flask-login
 werkzeug
 gunicorn
 requests
+Flask-Mail
+Authlib
