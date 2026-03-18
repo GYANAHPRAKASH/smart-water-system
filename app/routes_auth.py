@@ -137,6 +137,9 @@ def change_password():
 
 @auth.route("/auth/google")
 def google_login():
+    if not current_app.config.get('GOOGLE_CLIENT_ID'):
+        flash('Google login is not configured yet. Please use email/password login.', 'warning')
+        return redirect(url_for('auth.login'))
     redirect_uri = url_for('auth.google_callback', _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
 
