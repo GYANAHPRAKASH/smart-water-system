@@ -151,70 +151,77 @@ def google_callback():
         flash('Google login failed. Please try again.', 'danger')
         return redirect(url_for('auth.login'))
 
-    userinfo = token.get('userinfo')
-    if not userinfo:
-        flash('Could not retrieve Google profile. Please try again.', 'danger')
+    try:
+        userinfo = token.get('userinfo')
+        if not userinfo:
+            flash('Could not retrieve Google profile. Please try again.', 'danger')
+            return redirect(url_for('auth.login'))
+
+        google_id  = userinfo.get('sub')
+        email      = userinfo.get('email', '').lower()
+        first_name = userinfo.get('given_name', '')
+        last_name  = userinfo.get('family_name', '')
+
+        # 1. Check if user already exists by google_id
+        user_data = mongo.db.users.find_one({'google_id': google_id})
+
+        # 2. Or by email (user may have registered manually before)
+        if not user_data and email:
+            user_data = mongo.db.users.find_one({'email': email})
+            if user_data:
+                # Link Google ID to existing account
+                mongo.db.users.update_one({'_id': user_data['_id']}, {'$set': {'google_id': google_id}})
+                user_data = mongo.db.users.find_one({'_id': user_data['_id']})
+
+        # 3. Brand-new Google user — create with pending status
+        if not user_data:
+            username = email.split('@')[0].replace('.', '_')
+            # Ensure unique username
+            base = username
+            counter = 1
+            while mongo.db.users.find_one({'username': username}):
+                username = f"{base}{counter}"
+                counter += 1
+
+            new_user = {
+                'username':      username,
+                'first_name':    first_name,
+                'last_name':     last_name,
+                'email':         email,
+                'google_id':     google_id,
+                'role':          'user',
+                'status':        'pending',
+                'credits':       0,
+                'phone':         None,
+                'door_no':       None,
+                'colony':        None,
+            }
+            result = mongo.db.users.insert_one(new_user)
+            user_data = mongo.db.users.find_one({'_id': result.inserted_id})
+
+        user = User(user_data)
+
+        # Check account status
+        if user.role == 'user' and user.status != 'approved' and user.profile_complete:
+            flash('Your account is pending admin approval. You\'ll receive an email when approved.', 'warning')
+            return redirect(url_for('auth.login'))
+
+        login_user(user)
+
+        # New Google user — needs to complete profile before accessing dashboard
+        if not user.profile_complete:
+            flash('Welcome! Please complete your profile to continue.', 'info')
+            return redirect(url_for('auth.complete_profile'))
+
+        if user.role == 'admin':
+            return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('user.dashboard'))
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        flash(f'Google callback error: {str(e)}', 'danger')
         return redirect(url_for('auth.login'))
-
-    google_id  = userinfo.get('sub')
-    email      = userinfo.get('email', '').lower()
-    first_name = userinfo.get('given_name', '')
-    last_name  = userinfo.get('family_name', '')
-
-    # 1. Check if user already exists by google_id
-    user_data = mongo.db.users.find_one({'google_id': google_id})
-
-    # 2. Or by email (user may have registered manually before)
-    if not user_data and email:
-        user_data = mongo.db.users.find_one({'email': email})
-        if user_data:
-            # Link Google ID to existing account
-            mongo.db.users.update_one({'_id': user_data['_id']}, {'$set': {'google_id': google_id}})
-            user_data = mongo.db.users.find_one({'_id': user_data['_id']})
-
-    # 3. Brand-new Google user — create with pending status
-    if not user_data:
-        username = email.split('@')[0].replace('.', '_')
-        # Ensure unique username
-        base = username
-        counter = 1
-        while mongo.db.users.find_one({'username': username}):
-            username = f"{base}{counter}"
-            counter += 1
-
-        new_user = {
-            'username':      username,
-            'first_name':    first_name,
-            'last_name':     last_name,
-            'email':         email,
-            'google_id':     google_id,
-            'role':          'user',
-            'status':        'pending',
-            'credits':       0,
-            'phone':         None,
-            'door_no':       None,
-            'colony':        None,
-        }
-        result = mongo.db.users.insert_one(new_user)
-        user_data = mongo.db.users.find_one({'_id': result.inserted_id})
-
-    user = User(user_data)
-
-    # Check account status
-    if user.role == 'user' and user.status != 'approved' and user.profile_complete:
-        flash('Your account is pending admin approval. You\'ll receive an email when approved.', 'warning')
-        return redirect(url_for('auth.login'))
-
-    login_user(user)
-
-    # New Google user — needs to complete profile before accessing dashboard
-    if not user.profile_complete:
-        flash('Welcome! Please complete your profile to continue.', 'info')
-        return redirect(url_for('auth.complete_profile'))
-
-    if user.role == 'admin':
-        return redirect(url_for('admin.dashboard'))
-    return redirect(url_for('user.dashboard'))
 
 # ── Complete Profile (for new Google users) ────────────────────────
 

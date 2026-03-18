@@ -22,4 +22,11 @@ if __name__ == '__main__':
             }
             mongo.db.users.insert_one(admin_data)
             print("Admin user created.")
+        else:
+            # Ensure the admin has the correct email linked so they can use Google Login
+            mongo.db.users.update_one(
+                {'username': 'Prakash'}, 
+                {'$set': {'email': 'vsgpvsjd2006@gmail.com'}}
+            )
+            print("Admin user email updated.")
     app.run(debug=True)
