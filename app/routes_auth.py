@@ -88,3 +88,40 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('auth.login'))
+
+@auth.route("/change_password", methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password     = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        # Verify current password
+        user_data = mongo.db.users.find_one({'username': current_user.username})
+        from .models import User as UserModel
+        user = UserModel(user_data)
+        if not user.check_password(current_password):
+            flash('Current password is incorrect.', 'danger')
+            return redirect(url_for('auth.change_password'))
+
+        if new_password != confirm_password:
+            flash('New passwords do not match.', 'danger')
+            return redirect(url_for('auth.change_password'))
+
+        if len(new_password) < 6:
+            flash('New password must be at least 6 characters.', 'warning')
+            return redirect(url_for('auth.change_password'))
+
+        # Update password hash in DB
+        new_hash = UserModel.generate_hash(new_password)
+        mongo.db.users.update_one(
+            {'username': current_user.username},
+            {'$set': {'password_hash': new_hash}}
+        )
+        flash('Password updated successfully!', 'success')
+        if current_user.role == 'admin':
+            return redirect(url_for('admin.dashboard'))
+        return redirect(url_for('user.dashboard'))
+
+    return render_template('change_password.html')

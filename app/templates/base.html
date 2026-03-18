@@ -34,7 +34,11 @@
             <span class="nav-link fw-medium text-dark">Welcome, <span class="text-primary">{{ current_user.username }}</span></span>
           </li>
           <li class="nav-item d-flex align-items-center">
-            <a class="btn btn-danger text-white btn-sm ms-3 px-4 rounded-pill shadow-sm"
+            <a class="btn btn-outline-secondary btn-sm ms-2 px-3 rounded-pill shadow-sm"
+              href="{{ url_for('auth.change_password') }}"><i class="bi bi-shield-lock me-1"></i> Change Password</a>
+          </li>
+          <li class="nav-item d-flex align-items-center">
+            <a class="btn btn-danger text-white btn-sm ms-2 px-4 rounded-pill shadow-sm"
               href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a>
           </li>
           {% else %}
