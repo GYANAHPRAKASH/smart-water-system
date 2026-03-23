@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, url_for, flash, redirect, request
 from flask_login import current_user, login_required
 from . import mongo
 from bson.objectid import ObjectId
-from .ai_module import analyze_complaint
+from .ai_module import analyze_complaint, predict_demand
 from datetime import datetime
 
 user = Blueprint('user', __name__)
@@ -31,19 +31,22 @@ def dashboard():
     # Check if user is top 2 (Gamification constraint)
     top_users_data = list(mongo.db.users.find({'role': 'user'}).sort('credits', -1).limit(2))
     top_user_ids = [str(u['_id']) for u in top_users_data if u.get('credits', 0) > 0]
-    
     is_top_user = str(current_user.id) in top_user_ids
+
+    # AI: 7-day demand predictions for the user's own colony
+    predictions = predict_demand(current_user.colony) if current_user.colony else []
 
     return render_template('user_dashboard.html', 
                            complaints=my_complaints, 
                            schedules=schedules, 
                            schedules_data=schedules_data,
-                           is_top_user=is_top_user)
+                           is_top_user=is_top_user,
+                           predictions=predictions)
 
 @user.route("/user/submit_complaint", methods=['POST'])
 @login_required
 def submit_complaint():
-    type = request.form.get('type')
+    complaint_type = request.form.get('type')
     description = request.form.get('description')
     
     # AI Logic
@@ -51,7 +54,7 @@ def submit_complaint():
     
     new_complaint = {
         'user_id': ObjectId(current_user.id),
-        'type': type,
+        'type': complaint_type,
         'description': description,
         'priority': priority,
         'status': 'Pending',

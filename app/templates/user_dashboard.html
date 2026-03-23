@@ -75,6 +75,56 @@
     </div>
 </div>
 
+<!-- AI 7-Day Forecast -->
+{% if predictions %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card glass-card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between">
+                <h5 class="fw-bold mb-0" style="color: var(--deep-ocean);">
+                    <i class="bi bi-graph-up-arrow text-primary me-2"></i> 7-Day Water Demand Forecast &mdash; {{ current_user.colony }}
+                </h5>
+                <span class="badge bg-white text-primary border border-primary rounded-pill px-3 py-2 shadow-sm" style="font-size: 0.78rem;">
+                    <i class="bi bi-cpu me-1"></i> AI Prediction
+                </span>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="row g-2">
+                    {% for p in predictions %}
+                    {% set liters = p.amount %}
+                    {% set pct = [((liters / 800000) * 100) | int, 100] | min %}
+                    {% if liters > 700000 %}
+                        {% set bar_color = '#dc3545' %}
+                        {% set level = 'High' %}
+                        {% set badge = 'danger' %}
+                    {% elif liters > 550000 %}
+                        {% set bar_color = '#fd7e14' %}
+                        {% set level = 'Moderate' %}
+                        {% set badge = 'warning' %}
+                    {% else %}
+                        {% set bar_color = '#198754' %}
+                        {% set level = 'Normal' %}
+                        {% set badge = 'success' %}
+                    {% endif %}
+                    <div class="col-md col-6">
+                        <div class="bg-white rounded-4 p-3 shadow-sm text-center h-100">
+                            <p class="text-muted small fw-bold mb-1 text-uppercase" style="font-size: 0.7rem; letter-spacing:0.8px;">{{ p.date }}</p>
+                            <p class="fw-bold mb-1" style="font-size: 1rem; color: var(--deep-ocean);">{{ '{:,.0f}'.format(liters) }}<small class="text-muted fw-normal" style="font-size:0.65rem;"> L</small></p>
+                            <div class="progress rounded-pill mb-2" style="height: 6px; background: #e9ecef;">
+                                <div class="progress-bar rounded-pill" style="width: {{ pct }}%; background: {{ bar_color }};"></div>
+                            </div>
+                            <span class="badge bg-{{ badge }}-subtle text-{{ badge }} rounded-pill px-2" style="font-size: 0.7rem;">{{ level }}</span>
+                            <p class="text-muted mb-0 mt-1" style="font-size: 0.68rem;">{{ p.weather }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Main Grid -->
 <div class="row g-4">
     <!-- Left: Report & History -->

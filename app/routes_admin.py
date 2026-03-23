@@ -5,10 +5,16 @@ from . import mongo
 from .models import User
 from datetime import datetime
 from bson.objectid import ObjectId
+import threading
 from .ai_module import analyze_complaint, generate_simulated_data, predict_demand, detect_anomalies
 from .mail_service import send_account_approved, send_account_rejected, send_complaint_resolved, send_schedule_alert
 
 admin = Blueprint('admin', __name__)
+
+def _send_async(fn, *args, **kwargs):
+    """Run an email function in a background thread so it never blocks a request."""
+    t = threading.Thread(target=fn, args=args, kwargs=kwargs, daemon=True)
+    t.start()
 
 @admin.route("/admin/dashboard")
 @login_required
@@ -35,13 +41,11 @@ def dashboard():
     users_data = list(mongo.db.users.find(user_query))
     users = [User(u) for u in users_data]
     
-    # Leaderboard Logic: Get Top 2 globally (or optionally filtered)
-    # Let's get global top 2 regardless of filter to always show city-wide leaders
+    # Leaderboard Logic: Get Top 2 globally
     top_users_data = list(mongo.db.users.find({'role': 'user'}).sort('credits', -1).limit(2))
-    # We just need their IDs to tag them in the UI
     top_user_ids = [str(u['_id']) for u in top_users_data if u.get('credits', 0) > 0]
     
-    # Pending Users (Applying same filter if desired, or keep showing all. Let's apply filter for consistency)
+    # Pending Users
     pending_query = {'status': 'pending'}
     if user_filter_colony != 'All':
         pending_query['colony'] = user_filter_colony
@@ -50,18 +54,15 @@ def dashboard():
     pending_users = [User(u) for u in pending_users_data]
     
     # Complaints
-    # MongoDB sort by created_at DESC: -1
     raw_complaints = list(mongo.db.complaints.find().sort('created_at', -1))
     complaints = []
     active_complaints_count: int = 0
     for c in raw_complaints:
-        # Resolve user
         u_data = mongo.db.users.find_one({'_id': c['user_id']})
         if u_data:
             c['user'] = {'username': u_data.get('username'), 'colony': u_data.get('colony')}
         else:
             c['user'] = {'username': 'Unknown', 'colony': 'Unknown'}
-        # Jinja uses c.id, we can provide c['id'] because Jinja handles dict keys like attributes
         c['id'] = str(c['_id'])
         if c.get('status') != 'Resolved':
             active_complaints_count += 1
@@ -93,25 +94,22 @@ def dashboard():
     
     map_data = []
     for col in all_colonies:
-        # Check Today's Schedule
         today_sched = list(mongo.db.schedules.find({
             'colony': col,
             'date_time': {'$gte': today_start, '$lte': today_end}
         }))
         
-        status = 'Normal' # Default
+        status = 'Normal'
         if any(s['action'] == 'Shutdown' for s in today_sched):
             status = 'Shutdown'
         elif any(s['action'] == 'Supply' for s in today_sched):
             status = 'Supply'
             
-        # Check active High Priority Complaints
         active_complaints = list(mongo.db.complaints.find({
             'status': {'$ne': 'Resolved'},
             'priority': 'High'
         }))
         
-        # Filter active complaints by determining user colony
         critical_issues: int = 0
         for c in active_complaints:
             u_data = mongo.db.users.find_one({'_id': c['user_id']})
@@ -131,7 +129,7 @@ def dashboard():
                            pending_users=pending_users, 
                            complaints=complaints, 
                            active_complaints_count=active_complaints_count,
-                           schedules=raw_schedules, # Not strictly needed if admin_calendar uses JSON, but keeping for template structure
+                           schedules=raw_schedules,
                            schedules_data=schedules_data,
                            predictions=predicted_demand,
                            anomalies=anomalies,
@@ -149,8 +147,9 @@ def approve_user(user_id):
     
     user_data = mongo.db.users.find_one({'_id': ObjectId(user_id)})
     mongo.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'status': 'approved'}})
-    if user_data:
-        send_account_approved(user_data.get('email'), user_data.get('username'))
+    if user_data and user_data.get('email'):
+        # Send email in background thread — never blocks the HTTP response
+        _send_async(send_account_approved, user_data.get('email'), user_data.get('username'))
     flash('User has been approved.', 'success')
     return redirect(url_for('admin.dashboard'))
 
@@ -162,8 +161,8 @@ def reject_user(user_id):
     
     user_data = mongo.db.users.find_one({'_id': ObjectId(user_id)})
     mongo.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'status': 'rejected'}})
-    if user_data:
-        send_account_rejected(user_data.get('email'), user_data.get('username'))
+    if user_data and user_data.get('email'):
+        _send_async(send_account_rejected, user_data.get('email'), user_data.get('username'))
     flash('User has been rejected.', 'warning')
     return redirect(url_for('admin.dashboard'))
 
@@ -187,16 +186,14 @@ def resolve_complaint(complaint_id):
     if complaint:
         mongo.db.complaints.update_one({'_id': ObjectId(complaint_id)}, {'$set': {'status': 'Resolved'}})
         
-        # Award credits
         user_id = complaint.get('user_id')
         if user_id:
             mongo.db.users.update_one({'_id': user_id}, {'$inc': {'credits': 10}})
 
-        # Find user and send email
         user = mongo.db.users.find_one({'_id': user_id})
         uname = user.get('username') if user else 'User'
         if user and user.get('email'):
-            send_complaint_resolved(user.get('email'), uname, credits_awarded=10)
+            _send_async(send_complaint_resolved, user.get('email'), uname, 10)
         flash(f'Complaint resolved. 10 Credits awarded to {uname}.', 'success')
         
     return redirect(url_for('admin.dashboard'))
@@ -215,7 +212,6 @@ def schedule_supply():
     
     date_time = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
     
-    # Override logic: If action is Shutdown, clear any Supply for this day/colony
     if action == 'Shutdown':
         start_of_day = date_time.replace(hour=0, minute=0, second=0, microsecond=0)
         end_of_day = date_time.replace(hour=23, minute=59, second=59, microsecond=999)
@@ -233,10 +229,11 @@ def schedule_supply():
     }
     mongo.db.schedules.insert_one(new_schedule)
 
-    # Email all approved users in this colony
+    # Email all approved users in this colony (non-blocking)
     colony_users = list(mongo.db.users.find({'colony': colony, 'status': 'approved', 'role': 'user'}))
     emails = [u['email'] for u in colony_users if u.get('email')]
-    send_schedule_alert(emails, colony, action, date_time.strftime('%b %d, %Y at %I:%M %p'), notes or '')
+    if emails:
+        _send_async(send_schedule_alert, emails, colony, action, date_time.strftime('%b %d, %Y at %I:%M %p'), notes or '')
 
     flash('Water schedule updated successfully.', 'success')
     return redirect(url_for('admin.dashboard'))

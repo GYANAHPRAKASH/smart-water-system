@@ -65,7 +65,7 @@ In the Render dashboard → your service → **Environment** tab, add these vari
 
 ## Step 4 – Allow MongoDB Atlas Access from Render
 
-1. Go to [cloud.mongodb.com](https://cloud.mongodb.com) → your cluster → **Network Access**
+1. Go to [cloud.mongodb.com](https://clouxd.mongodb.com) → your cluster → **Network Access**
 2. Click **Add IP Address** → select **Allow access from anywhere** (`0.0.0.0/0`)
 3. Click **Confirm**
 
