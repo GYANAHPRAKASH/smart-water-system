@@ -29,9 +29,6 @@ class User(UserMixin):
     def email(self):
         return self.user_data.get('email')
 
-    @property
-    def google_id(self):
-        return self.user_data.get('google_id')
 
     @property
     def profile_complete(self):

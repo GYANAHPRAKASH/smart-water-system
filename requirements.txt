@@ -6,4 +6,3 @@ werkzeug
 gunicorn
 requests
 Flask-Mail
-Authlib

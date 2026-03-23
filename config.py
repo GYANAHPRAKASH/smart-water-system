@@ -22,7 +22,3 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = ('AquaFlow', os.environ.get('MAIL_USERNAME') or 'noreply@aquaflow.com')
-
-    # Google OAuth
-    GOOGLE_CLIENT_ID     = os.environ.get('GOOGLE_CLIENT_ID')
-    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
