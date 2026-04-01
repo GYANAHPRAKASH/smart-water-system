@@ -104,15 +104,15 @@
                         <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-graph-up-arrow text-info me-2"></i> AI Demand Prediction ({{ selected_colony }})</h5>
                         <span class="badge bg-info text-dark rounded-pill shadow-sm px-3">Next 7 Days</span>
                     </div>
-                    <div class="card-body position-relative">
+                    <div class="card-body position-relative" style="min-height: 300px;">
                         <!-- Loading Spinner: visible until Chart.js finishes rendering -->
-                        <div id="chartLoader" class="d-flex flex-column align-items-center justify-content-center py-5">
+                        <div id="chartLoader" class="d-flex flex-column align-items-center justify-content-center position-absolute top-0 start-0 w-100 h-100 bg-white" style="z-index: 10; border-radius: 12px;">
                             <div class="spinner-border text-info mb-3" role="status" style="width:2.5rem;height:2.5rem;">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
                             <p class="text-muted small mb-0">AI model processing predictions...</p>
                         </div>
-                        <canvas id="demandChart" style="display:none;"></canvas>
+                        <canvas id="demandChart"></canvas>
                     </div>
 
                 </div>
@@ -505,11 +505,14 @@
                         responsive: true,
                         animation: {
                             onComplete: function() {
-                                // Hide spinner, reveal chart once rendering is complete
-                                const loader = document.getElementById('chartLoader');
-                                loader.classList.remove('d-flex');
-                                loader.style.display = 'none';
-                                document.getElementById('demandChart').style.display = 'block';
+                                // Hide spinner after a brief delay so the user perceives the AI processing state
+                                setTimeout(() => {
+                                    const loader = document.getElementById('chartLoader');
+                                    if (loader) {
+                                        loader.classList.remove('d-flex');
+                                        loader.style.display = 'none';
+                                    }
+                                }, 600);
                             }
                         },
                         plugins: {
