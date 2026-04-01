@@ -101,4 +101,12 @@ def get_forecast(days=7):
         return forecast
     except Exception as e:
         print(f"[AquaFlow] Error fetching forecast: {e}")
-        return _forecast_cache['data'] or []
+        if _forecast_cache.get('data'):
+            return _forecast_cache['data']
+            
+        # Guarantee 7-day fallback so UI never breaks
+        fallback = []
+        for i in range(days):
+            dt = (datetime.date.today() + datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+            fallback.append({'date': dt, 'temp': 34.0, 'rain': 0.0})
+        return fallback

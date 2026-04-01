@@ -506,7 +506,9 @@
                         animation: {
                             onComplete: function() {
                                 // Hide spinner, reveal chart once rendering is complete
-                                document.getElementById('chartLoader').style.display = 'none';
+                                const loader = document.getElementById('chartLoader');
+                                loader.classList.remove('d-flex');
+                                loader.style.display = 'none';
                                 document.getElementById('demandChart').style.display = 'block';
                             }
                         },
