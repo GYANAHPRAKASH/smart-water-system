@@ -11,9 +11,16 @@ from .mail_service import send_account_approved, send_account_rejected, send_com
 
 admin = Blueprint('admin', __name__)
 
+from flask import current_app
+
 def _send_async(fn, *args, **kwargs):
     """Run an email function in a background thread so it never blocks a request."""
-    t = threading.Thread(target=fn, args=args, kwargs=kwargs, daemon=True)
+    app = current_app._get_current_object()
+    def async_worker():
+        with app.app_context():
+            fn(*args, **kwargs)
+            
+    t = threading.Thread(target=async_worker, daemon=True)
     t.start()
 
 @admin.route("/admin/dashboard")
