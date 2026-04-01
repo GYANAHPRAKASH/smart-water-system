@@ -23,13 +23,13 @@ from datetime import datetime, timedelta
 import random
 import statistics
 
-import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-
 from . import mongo
 from .weather_service import get_historical_weather, get_forecast
+
+# NOTE: numpy and scikit-learn are imported LAZILY inside _train_model()
+# This prevents ~150MB RAM usage at Flask startup on Render's free tier.
+# The imports only happen when a prediction is first requested.
+
 
 COLOCATES = ["Anna Nagar", "Nungambakkam", "T. Nagar", "Alwarpet", "Gopalapuram"]
 COLONIES = COLOCATES  # alias
@@ -131,6 +131,13 @@ def _train_model(colony):
     Result is cached in memory (TTL 6 hours) — only trains once per server
     restart, not on every page load.
     """
+    # Lazy imports — only load sklearn/numpy when a prediction is actually requested
+    # (avoids ~150MB RAM hit at Flask startup on Render free tier)
+    import numpy as np
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.model_selection import train_test_split
+
     # ── Serve from cache if fresh ──
     model, scaler, r2, n = _get_cached_model(colony)
     if model is not None:
@@ -232,6 +239,7 @@ def predict_demand(colony):
         predicted_val = max(300_000, min(1_200_000, predicted_val))
 
         # Individual tree predictions for confidence interval
+        import numpy as np  # lazy import (already loaded if _train_model ran)
         tree_preds = np.array([tree.predict(features_scaled)[0] for tree in model.estimators_])
         std_dev = np.std(tree_preds)
         confidence_pct = max(0, min(100, int(100 - (std_dev / predicted_val * 100))))
