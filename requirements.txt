@@ -6,3 +6,5 @@ werkzeug
 gunicorn
 requests
 Flask-Mail
+scikit-learn
+numpy

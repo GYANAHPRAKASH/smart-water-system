@@ -27,11 +27,23 @@ def api_predict_demand():
     }
     mongo.db.ai_logs.insert_one(log)
 
+    # Extract model metadata from first prediction if available
+    model_info = {}
+    if predictions:
+        first = predictions[0]
+        model_info = {
+            'model_type': 'RandomForestRegressor (scikit-learn)',
+            'accuracy': first.get('model_accuracy', 'N/A'),
+            'features': ['max_temp', 'precipitation', 'day_of_week', 'month', 'is_summer', 'is_monsoon'],
+            'weather_api': 'Open-Meteo Forecast API (open-meteo.com)',
+        }
+
     return jsonify({
         'status': 'success',
         'colony': colony,
         'predictions': predictions,
-        'message': 'AI processing completed successfully.'
+        'model_info': model_info,
+        'message': 'ML model prediction completed successfully.'
     })
 
 @api.route('/api/analyze_complaint', methods=['POST'])

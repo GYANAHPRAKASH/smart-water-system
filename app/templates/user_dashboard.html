@@ -337,7 +337,12 @@
                 }
                 iconWrapper.style.background = gradient;
                 insightText.classList.remove('placeholder-glow');
-                insightText.innerHTML = `<span class="fade-in-text"><strong>Analysis Complete:</strong> ${message}</span>`;
+                const modelInfo = data.model_info || {};
+                const accuracy = modelInfo.accuracy || '';
+                const firstPred = data.predictions[0] || {};
+                const confidence = firstPred.confidence || '';
+                const modelTag = accuracy ? ` <span class="badge bg-dark rounded-pill px-2" style="font-size:0.65rem;"><i class="bi bi-cpu-fill me-1"></i>RF Model · ${accuracy}${confidence ? ' · Conf: ' + confidence : ''}</span>` : '';
+                insightText.innerHTML = `<span class="fade-in-text"><strong>ML Analysis:</strong> ${message}${modelTag}</span>`;
             } else {
                 insightText.classList.remove('placeholder-glow');
                 insightText.innerText = "AI insights currently unavailable.";
