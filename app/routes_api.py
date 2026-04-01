@@ -7,6 +7,12 @@ from app.ai_module import analyze_complaint, predict_demand
 
 api = Blueprint('api', __name__)
 
+@api.route('/health', methods=['GET'])
+def health_check():
+    """Simple 200 OK route for Render's Health Check Path."""
+    return "OK", 200
+
+
 @api.route('/api/predict_demand', methods=['POST'])
 def api_predict_demand():
     """
