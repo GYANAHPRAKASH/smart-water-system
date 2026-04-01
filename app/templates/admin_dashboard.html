@@ -101,40 +101,11 @@
             <div class="col-md-8">
                 <div class="card glass-card border-0 h-100 shadow-sm">
                     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2">
-                        <div>
-                            <h5 class="fw-bold mb-1" style="color: var(--deep-ocean);"><i class="bi bi-graph-up-arrow text-info me-2"></i> ML Demand Prediction ({{ selected_colony }})</h5>
-                            {% if predictions and predictions[0].model_accuracy is defined %}
-                            <div class="d-flex flex-wrap gap-2 mt-1">
-                                <span class="badge bg-dark text-white rounded-pill px-3" style="font-size:0.72rem;"><i class="bi bi-cpu-fill me-1"></i>RandomForestRegressor</span>
-                                <span class="badge bg-success text-white rounded-pill px-3" style="font-size:0.72rem;"><i class="bi bi-bar-chart-fill me-1"></i>{{ predictions[0].model_accuracy }}</span>
-                                <span class="badge bg-primary text-white rounded-pill px-3" style="font-size:0.72rem;"><i class="bi bi-layers-fill me-1"></i>6 Features</span>
-                            </div>
-                            {% endif %}
-                        </div>
+                        <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-graph-up-arrow text-info me-2"></i> AI Demand Prediction ({{ selected_colony }})</h5>
                         <span class="badge bg-info text-dark rounded-pill shadow-sm px-3">Next 7 Days</span>
                     </div>
                     <div class="card-body">
                         <canvas id="demandChart"></canvas>
-                        {% if predictions %}
-                        <div class="row g-2 mt-2">
-                            {% for p in predictions %}
-                            <div class="col">
-                                <div class="text-center p-2 rounded-3 bg-light">
-                                    <p class="mb-0 small fw-bold" style="font-size:0.68rem;">{{ p.date }}</p>
-                                    <p class="mb-0 fw-bold text-primary" style="font-size:0.85rem;">{{ '{:,.0f}'.format(p.amount) }}L</p>
-                                    {% if p.confidence is defined and p.confidence != 'Formula' %}
-                                    <span class="badge rounded-pill px-2 py-1
-                                        {% if p.confidence|replace('%','')|int >= 80 %}bg-success
-                                        {% elif p.confidence|replace('%','')|int >= 60 %}bg-warning text-dark
-                                        {% else %}bg-secondary{% endif %}
-                                        " style="font-size:0.62rem;">{{ p.confidence }}</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <p class="text-muted small mt-2 mb-0"><i class="bi bi-info-circle me-1"></i>Features: Max Temp, Rainfall, Day-of-Week, Month, Summer Flag, Monsoon Flag. Confidence = agreement among 150 decision trees.</p>
-                        {% endif %}
                     </div>
                 </div>
             </div>
