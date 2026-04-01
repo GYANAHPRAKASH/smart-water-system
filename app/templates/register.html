@@ -37,12 +37,17 @@
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <div class="form-floating">
-                                <input type="tel" class="form-control" id="phone" name="phone"
-                                    placeholder="Phone Number" required>
-                                <label for="phone" class="text-muted">
-                                    <i class="bi bi-telephone me-1"></i> Phone Number
-                                </label>
+                            <div class="input-group shadow-sm" style="border-radius: 0.375rem; overflow: hidden;">
+                                <span class="input-group-text bg-white text-muted border-end-0 border" style="padding-top: 1rem; padding-bottom: 1rem;">
+                                    <i class="bi bi-telephone ms-1 me-1"></i> <strong class="text-dark">+91</strong>
+                                </span>
+                                <div class="form-floating flex-grow-1">
+                                    <input type="tel" class="form-control border-start-0 ps-2 shadow-none border" id="phone" name="phone"
+                                        placeholder="Phone Number" required pattern="\d{10}" maxlength="10" title="Must be exactly 10 digits">
+                                    <label for="phone" class="text-muted" style="left: -4px;">
+                                        10-digit Phone Number
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -57,7 +62,7 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <input type="text" class="form-control" id="username" name="username"
-                                    placeholder="Username" required autocomplete="username">
+                                    placeholder="Username" required minlength="4" autocomplete="username">
                                 <label for="username" class="text-muted">
                                     <i class="bi bi-person me-1"></i> Username
                                 </label>
@@ -66,7 +71,7 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <input type="password" class="form-control" id="password" name="password"
-                                    placeholder="Password" required autocomplete="new-password">
+                                    placeholder="Password" required minlength="6" autocomplete="new-password">
                                 <label for="password" class="text-muted">
                                     <i class="bi bi-lock me-1"></i> Password
                                 </label>

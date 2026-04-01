@@ -26,7 +26,8 @@ def register():
         first_name = request.form.get('first_name')
         last_name  = request.form.get('last_name')
         email      = request.form.get('email', '').strip().lower()
-        phone      = request.form.get('phone')
+        phone_raw  = request.form.get('phone', '').strip()
+        phone      = f"+91 {phone_raw}" if phone_raw else ""
         door_no    = request.form.get('door_no')
         colony     = request.form.get('colony')
 
