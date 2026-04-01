@@ -35,7 +35,7 @@ A full-stack AI-powered water management platform for urban colonies. It gives r
 | **Anomaly Detector** | Z-score (σ > 2.0) | Flags statistically abnormal usage days with contextual reasons (summer peak, monsoon, etc.) |
 
 **External APIs:**
-- [Open-Meteo Historical](https://archive-api.open-meteo.com/) — Real Chennai weather data to train the ML model (no API key required)
+- [Open-Meteo Historical](https://archive-api.open-meteo.com/) — Real Chennai weather data to train the ML model
 - [Open-Meteo Forecast](https://api.open-meteo.com/) — 7-day weather forecast for predictions (no API key required)
 
 ---

@@ -31,7 +31,35 @@ from sklearn.model_selection import train_test_split
 from . import mongo
 from .weather_service import get_historical_weather, get_forecast
 
-COLONIES = ["Anna Nagar", "Nungambakkam", "T. Nagar", "Alwarpet", "Gopalapuram"]
+COLOCATES = ["Anna Nagar", "Nungambakkam", "T. Nagar", "Alwarpet", "Gopalapuram"]
+COLONIES = COLOCATES  # alias
+
+# ─────────────────────────────────────────────────────────────────
+# In-Memory Model Cache (per colony, TTL = 6 hours)
+# Prevents re-training RandomForest on every page load
+# ─────────────────────────────────────────────────────────────────
+_model_cache = {}
+# Structure: { colony: { 'model': ..., 'scaler': ..., 'r2': ..., 'n': ..., 'trained_at': datetime } }
+
+MODEL_CACHE_TTL_HOURS = 6
+
+def _get_cached_model(colony):
+    """Return cached (model, scaler, r2, n) if still fresh, else None."""
+    entry = _model_cache.get(colony)
+    if not entry:
+        return None, None, None, 0
+    age_hours = (datetime.utcnow() - entry['trained_at']).total_seconds() / 3600
+    if age_hours > MODEL_CACHE_TTL_HOURS:
+        return None, None, None, 0
+    return entry['model'], entry['scaler'], entry['r2'], entry['n']
+
+def _cache_model(colony, model, scaler, r2, n):
+    """Store trained model in cache."""
+    _model_cache[colony] = {
+        'model': model, 'scaler': scaler,
+        'r2': r2, 'n': n,
+        'trained_at': datetime.utcnow()
+    }
 
 # ─────────────────────────────────────────────────────────────────
 # 1. NLP-Based Complaint Priority Classifier
@@ -99,21 +127,20 @@ def _build_feature_vector(temp, rain, date_str):
 
 def _train_model(colony):
     """
-    Trains a RandomForestRegressor on all available historical water usage data
-    for the given colony, augmented with the actual weather that day.
-
-    Training Data: MongoDB water_usage collection (up to 365 records per colony)
-    Features (X): [max_temp, precipitation, day_of_week, month, is_summer, is_monsoon]
-    Target  (y): amount_liters used that day
-
-    Returns: (trained_model, scaler, r2_score, n_samples) or None if insufficient data.
+    Trains a RandomForestRegressor on historical water usage + weather data.
+    Result is cached in memory (TTL 6 hours) — only trains once per server
+    restart, not on every page load.
     """
-    records = list(mongo.db.water_usage.find({'colony': colony}).sort('date', 1))
+    # ── Serve from cache if fresh ──
+    model, scaler, r2, n = _get_cached_model(colony)
+    if model is not None:
+        return model, scaler, r2, n
 
+    # ── Cache miss: train model ──
+    records = list(mongo.db.water_usage.find({'colony': colony}).sort('date', 1))
     if len(records) < 30:
         return None, None, None, 0
 
-    # Fetch actual historical weather to align with usage records
     days_needed = (datetime.today() - records[0]['date']).days + 1
     historical_weather = get_historical_weather(min(days_needed, 365))
 
@@ -131,11 +158,9 @@ def _train_model(colony):
     X_arr = np.array(X)
     y_arr = np.array(y)
 
-    # Normalize features for better convergence
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_arr)
 
-    # Split: 80% train, 20% hold-out test for scoring
     if len(X_arr) >= 50:
         X_train, X_test, y_train, y_test = train_test_split(
             X_scaled, y_arr, test_size=0.2, random_state=42
@@ -143,18 +168,15 @@ def _train_model(colony):
     else:
         X_train, X_test, y_train, y_test = X_scaled, X_scaled, y_arr, y_arr
 
-    # Random Forest: 150 trees, captures non-linear patterns (temperature spikes,
-    # monsoon effects, weekend usage changes)
     model = RandomForestRegressor(
-        n_estimators=150,
-        max_depth=10,
-        min_samples_split=4,
-        random_state=42,
-        n_jobs=-1  # use all CPU cores
+        n_estimators=150, max_depth=10,
+        min_samples_split=4, random_state=42, n_jobs=-1
     )
     model.fit(X_train, y_train)
-
     r2 = round(model.score(X_test, y_test), 3)
+
+    # ── Store in cache ──
+    _cache_model(colony, model, scaler, r2, len(X))
     return model, scaler, r2, len(X)
 
 
