@@ -104,9 +104,17 @@
                         <h5 class="fw-bold" style="color: var(--deep-ocean);"><i class="bi bi-graph-up-arrow text-info me-2"></i> AI Demand Prediction ({{ selected_colony }})</h5>
                         <span class="badge bg-info text-dark rounded-pill shadow-sm px-3">Next 7 Days</span>
                     </div>
-                    <div class="card-body">
-                        <canvas id="demandChart"></canvas>
+                    <div class="card-body position-relative">
+                        <!-- Loading Spinner: visible until Chart.js finishes rendering -->
+                        <div id="chartLoader" class="d-flex flex-column align-items-center justify-content-center py-5">
+                            <div class="spinner-border text-info mb-3" role="status" style="width:2.5rem;height:2.5rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted small mb-0">AI model processing predictions...</p>
+                        </div>
+                        <canvas id="demandChart" style="display:none;"></canvas>
                     </div>
+
                 </div>
             </div>
             <div class="col-md-4">
@@ -470,36 +478,69 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         
-        // AI Demand Chart Use Safe Data Access
-        var ctx = document.getElementById('demandChart').getContext('2d');
+        // AI Demand Chart — Use Safe Data Access
+        try {
+            var predictions = JSON.parse(document.getElementById('predictions-data').textContent);
+            var labels = predictions.map(p => p.date);
+            var amounts = predictions.map(p => p.amount);
 
-        // Parse data from hidden script tags to avoid Jinja JS syntax errors
-        var predictions = JSON.parse(document.getElementById('predictions-data').textContent);
-    var labels = predictions.map(p => p.date);
-    var data = predictions.map(p => p.amount);
-
-    var demandChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Predicted Demand (Liters)',
-                data: data,
-                borderColor: '#0dcaf0',
-                backgroundColor: 'rgba(13, 202, 240, 0.2)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
+            if (predictions.length > 0) {
+                var ctx = document.getElementById('demandChart').getContext('2d');
+                var demandChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Predicted Demand (Liters)',
+                            data: amounts,
+                            borderColor: '#0dcaf0',
+                            backgroundColor: 'rgba(13, 202, 240, 0.2)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        animation: {
+                            onComplete: function() {
+                                // Hide spinner, reveal chart once rendering is complete
+                                document.getElementById('chartLoader').style.display = 'none';
+                                document.getElementById('demandChart').style.display = 'block';
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(ctx) {
+                                        return ' ' + ctx.parsed.y.toLocaleString() + ' L';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: function(val) {
+                                        return (val / 1000).toFixed(0) + 'k L';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                // No prediction data — show friendly message
+                document.getElementById('chartLoader').innerHTML =
+                    '<div class="text-center text-muted py-4"><i class="bi bi-exclamation-circle fs-2 mb-2 d-block"></i><p class="mb-0">No prediction data available.<br><small>Run <code>populate_data.py</code> to seed historical data.</small></p></div>';
             }
+        } catch(e) {
+            document.getElementById('chartLoader').innerHTML =
+                '<div class="text-center text-danger py-4"><i class="bi bi-x-circle fs-2 mb-2 d-block"></i><p class="mb-0">Chart could not be rendered.<br><small>' + e.message + '</small></p></div>';
         }
-    });
+
 
     // Initialize Calendar
     var calendarEl = document.getElementById('admin-calendar');
