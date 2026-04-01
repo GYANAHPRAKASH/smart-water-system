@@ -38,7 +38,7 @@ def send_registration_pending(user_email, username):
       <p style="margin:0;color:#03045e;"><strong>Username:</strong> {username}</p>
     </div>
     <p>If you have questions, contact the City Admin at
-      <a href="mailto:cityadmin@aquaflow.com" style="color:#0077b6;">cityadmin@aquaflow.com</a> or <strong>+91 98765 43210</strong>.
+      <a href="mailto:vsgpvsjd2006@gmail.com" style="color:#0077b6;">vsgpvsjd2006@gmail.com</a> or <strong>+91 98765 43210</strong>.
     </p>
     """
     msg = Message(subject="AquaFlow — Account Pending Approval",
@@ -75,7 +75,7 @@ def send_account_rejected(user_email, username):
     <p>Hi <strong>{username}</strong>,</p>
     <p>Unfortunately your AquaFlow account request has been <strong style="color:#dc3545;">rejected</strong>.</p>
     <p>This may be due to incorrect colony information or an administrative decision. Please contact the City Admin for details.</p>
-    <p>📧 <a href="mailto:cityadmin@aquaflow.com" style="color:#0077b6;">cityadmin@aquaflow.com</a>
+    <p>📧 <a href="mailto:vsgpvsjd2006@gmail.com" style="color:#0077b6;">vsgpvsjd2006@gmail.com</a>
        &nbsp;|&nbsp; 📞 <strong>+91 98765 43210</strong></p>
     """
     msg = Message(subject="AquaFlow — Account Update",
