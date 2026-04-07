@@ -15,10 +15,15 @@ class Config:
         
     MONGO_URI = _mongo_uri
 
-    # Flask-Mail (Gmail SMTP)
+    # Flask-Mail (kept for backward compat but not used for sending)
     MAIL_SERVER   = 'smtp.gmail.com'
     MAIL_PORT     = 587
     MAIL_USE_TLS  = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = ('AquaFlow', os.environ.get('MAIL_USERNAME') or 'noreply@aquaflow.com')
+
+    # Brevo (formerly Sendinblue) — used for transactional emails via HTTPS
+    # Works on Render free tier (no SMTP port restrictions)
+    BREVO_API_KEY    = os.environ.get('BREVO_API_KEY')
+    MAIL_SENDER_EMAIL = os.environ.get('MAIL_SENDER_EMAIL', 'vsgpvsjd2006@gmail.com')

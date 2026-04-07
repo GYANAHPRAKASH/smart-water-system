@@ -5,23 +5,10 @@ from . import mongo
 from .models import User
 from datetime import datetime
 from bson.objectid import ObjectId
-import threading
 from .ai_module import analyze_complaint, generate_simulated_data, predict_demand, detect_anomalies
 from .mail_service import send_account_approved, send_account_rejected, send_account_deleted, send_complaint_resolved, send_schedule_alert
 
 admin = Blueprint('admin', __name__)
-
-from flask import current_app
-
-def _send_async(fn, *args, **kwargs):
-    """Run an email function in a background thread so it never blocks a request."""
-    app = current_app._get_current_object()
-    def async_worker():
-        with app.app_context():
-            fn(*args, **kwargs)
-            
-    t = threading.Thread(target=async_worker, daemon=True)
-    t.start()
 
 @admin.route("/admin/dashboard")
 @login_required
@@ -155,8 +142,7 @@ def approve_user(user_id):
     user_data = mongo.db.users.find_one({'_id': ObjectId(user_id)})
     mongo.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'status': 'approved'}})
     if user_data and user_data.get('email'):
-        # Send email in background thread — never blocks the HTTP response
-        _send_async(send_account_approved, user_data.get('email'), user_data.get('username'))
+        send_account_approved(user_data.get('email'), user_data.get('username'))
     flash('User has been approved.', 'success')
     return redirect(url_for('admin.dashboard'))
 
@@ -169,7 +155,7 @@ def reject_user(user_id):
     user_data = mongo.db.users.find_one({'_id': ObjectId(user_id)})
     mongo.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'status': 'rejected'}})
     if user_data and user_data.get('email'):
-        _send_async(send_account_rejected, user_data.get('email'), user_data.get('username'))
+        send_account_rejected(user_data.get('email'), user_data.get('username'))
     flash('User has been rejected.', 'warning')
     return redirect(url_for('admin.dashboard'))
 
@@ -184,7 +170,7 @@ def delete_user(user_id):
     mongo.db.users.delete_one({'_id': ObjectId(user_id)})
 
     if user_data and user_data.get('email'):
-        _send_async(send_account_deleted, user_data.get('email'), user_data.get('username', 'User'))
+        send_account_deleted(user_data.get('email'), user_data.get('username', 'User'))
 
     flash('User has been deleted and notified by email.', 'danger')
     return redirect(url_for('admin.dashboard'))
@@ -206,7 +192,7 @@ def resolve_complaint(complaint_id):
         user = mongo.db.users.find_one({'_id': user_id})
         uname = user.get('username') if user else 'User'
         if user and user.get('email'):
-            _send_async(send_complaint_resolved, user.get('email'), uname, 10)
+            send_complaint_resolved(user.get('email'), uname, 10)
         flash(f'Complaint resolved. 10 Credits awarded to {uname}.', 'success')
         
     return redirect(url_for('admin.dashboard'))
@@ -254,7 +240,7 @@ def schedule_supply():
     colony_users = list(mongo.db.users.find({'colony': colony, 'status': 'approved', 'role': 'user'}))
     emails = [u['email'] for u in colony_users if u.get('email')]
     if emails:
-        _send_async(send_schedule_alert, emails, colony, action, date_time.strftime('%b %d, %Y at %I:%M %p'), notes or '')
+        send_schedule_alert(emails, colony, action, date_time.strftime('%b %d, %Y at %I:%M %p'), notes or '')
 
     flash('Water schedule updated successfully.', 'success')
     return redirect(url_for('admin.dashboard'))

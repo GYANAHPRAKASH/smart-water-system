@@ -1,9 +1,25 @@
 # pyre-ignore-all-errors
-from flask import render_template_string
-from flask_mail import Message
-from . import mail
+"""
+AquaFlow Mail Service — Brevo (formerly Sendinblue) HTTPS API
+=============================================================
+Uses Brevo's REST API over HTTPS (port 443) instead of SMTP.
+This works on ALL cloud platforms including Render's free tier,
+which blocks outbound SMTP port 587.
 
-# ── Email Templates ───────────────────────────────────────────────
+Required env var: BREVO_API_KEY (set in Render dashboard & .env)
+Optional: MAIL_SENDER_EMAIL (defaults to vsgpvsjd2006@gmail.com)
+"""
+import threading
+import requests
+from flask import current_app
+
+
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+DEFAULT_SENDER_EMAIL = "vsgpvsjd2006@gmail.com"
+DEFAULT_SENDER_NAME  = "AquaFlow"
+
+
+# ── HTML Email Base Template ──────────────────────────────────────
 
 def _base_html(title, content):
     return f"""
@@ -24,7 +40,56 @@ def _base_html(title, content):
     </div>
     """
 
-# ── Senders ───────────────────────────────────────────────────────
+
+# ── Core Sender (Brevo HTTPS API) ─────────────────────────────────
+
+def _send_via_brevo(to_email, to_name, subject, html_content):
+    """
+    Send one email through Brevo's transactional API (HTTPS POST).
+    Works on Render free tier — no SMTP port restrictions.
+    """
+    app = current_app._get_current_object()
+    api_key = app.config.get('BREVO_API_KEY')
+
+    if not api_key:
+        print(f"[AquaFlow Mail] BREVO_API_KEY not set — skipping email to {to_email}")
+        return
+
+    sender_email = app.config.get('MAIL_SENDER_EMAIL', DEFAULT_SENDER_EMAIL)
+
+    payload = {
+        "sender": {"name": DEFAULT_SENDER_NAME, "email": sender_email},
+        "to": [{"email": to_email, "name": to_name or to_email}],
+        "subject": subject,
+        "htmlContent": html_content
+    }
+    headers = {
+        "accept":       "application/json",
+        "content-type": "application/json",
+        "api-key":      api_key
+    }
+
+    try:
+        resp = requests.post(BREVO_API_URL, json=payload, headers=headers, timeout=10)
+        if resp.status_code in (200, 201):
+            print(f"[AquaFlow Mail] ✅ Email sent to {to_email} — {subject}")
+        else:
+            print(f"[AquaFlow Mail] ❌ Brevo error {resp.status_code}: {resp.text}")
+    except Exception as e:
+        print(f"[AquaFlow Mail] ❌ Failed to send email to {to_email}: {e}")
+
+
+def _send_async(to_email, to_name, subject, html_content):
+    """Run email send in a background thread — never blocks the HTTP response."""
+    app = current_app._get_current_object()
+    def worker():
+        with app.app_context():
+            _send_via_brevo(to_email, to_name, subject, html_content)
+    t = threading.Thread(target=worker, daemon=False)
+    t.start()
+
+
+# ── Public Email Senders ──────────────────────────────────────────
 
 def send_registration_pending(user_email, username):
     """Sent immediately after a user registers — tells them to wait for admin approval."""
@@ -38,13 +103,14 @@ def send_registration_pending(user_email, username):
       <p style="margin:0;color:#03045e;"><strong>Username:</strong> {username}</p>
     </div>
     <p>If you have questions, contact the City Admin at
-      <a href="mailto:vsgpvsjd2006@gmail.com" style="color:#0077b6;">vsgpvsjd2006@gmail.com</a> or <strong>+91 98765 43210</strong>.
+      <a href="mailto:vsgpvsjd2006@gmail.com" style="color:#0077b6;">vsgpvsjd2006@gmail.com</a>
+      or <strong>+91 98765 43210</strong>.
     </p>
     """
-    msg = Message(subject="AquaFlow — Account Pending Approval",
-                  recipients=[user_email],
-                  html=_base_html("Account Created ✅", content))
-    _send(msg)
+    _send_async(user_email, username,
+                "AquaFlow — Account Pending Approval ⏳",
+                _base_html("Account Created ✅", content))
+
 
 def send_account_approved(user_email, username):
     """Sent when admin approves a user."""
@@ -55,17 +121,17 @@ def send_account_approved(user_email, username):
     <p>Great news! Your AquaFlow account has been <strong style="color:#198754;">approved</strong>.</p>
     <p>You can now log in and access your colony's water schedule, report issues, and earn credits.</p>
     <div style="text-align:center;margin:24px 0;">
-      <a href="https://aquaflow-jylh.onrender.com/login"
+      <a href="https://smart-water-system-h73w.onrender.com/login"
          style="background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;text-decoration:none;
                 padding:12px 32px;border-radius:50px;font-weight:700;font-size:1rem;">
         Login to AquaFlow →
       </a>
     </div>
     """
-    msg = Message(subject="AquaFlow — Account Approved 🎉",
-                  recipients=[user_email],
-                  html=_base_html("Your Account is Live!", content))
-    _send(msg)
+    _send_async(user_email, username,
+                "AquaFlow — Account Approved 🎉",
+                _base_html("Your Account is Live!", content))
+
 
 def send_account_rejected(user_email, username):
     """Sent when admin rejects a user."""
@@ -78,10 +144,10 @@ def send_account_rejected(user_email, username):
     <p>📧 <a href="mailto:vsgpvsjd2006@gmail.com" style="color:#0077b6;">vsgpvsjd2006@gmail.com</a>
        &nbsp;|&nbsp; 📞 <strong>+91 98765 43210</strong></p>
     """
-    msg = Message(subject="AquaFlow — Account Update",
-                  recipients=[user_email],
-                  html=_base_html("Account Status Update", content))
-    _send(msg)
+    _send_async(user_email, username,
+                "AquaFlow — Account Update",
+                _base_html("Account Status Update", content))
+
 
 def send_account_deleted(user_email, username):
     """Sent when admin permanently deletes a user account."""
@@ -97,12 +163,12 @@ def send_account_deleted(user_email, username):
         📞 <strong>+91 98765 43210</strong>
       </p>
     </div>
-    <p style="color:#6c757d;font-size:0.9rem;">This action cannot be undone. If you wish to rejoin AquaFlow, you may register again and await admin approval.</p>
+    <p style="color:#6c757d;font-size:0.9rem;">If you wish to rejoin AquaFlow, you may register again and await admin approval.</p>
     """
-    msg = Message(subject="AquaFlow — Account Removed",
-                  recipients=[user_email],
-                  html=_base_html("Account Removed 🚫", content))
-    _send(msg)
+    _send_async(user_email, username,
+                "AquaFlow — Account Removed 🚫",
+                _base_html("Account Removed", content))
+
 
 def send_complaint_resolved(user_email, username, credits_awarded=10):
     """Sent when admin resolves a complaint and awards credits."""
@@ -118,24 +184,24 @@ def send_complaint_resolved(user_email, username, credits_awarded=10):
     </div>
     <p>Top contributors earn a <strong>50% discount on their water bill</strong>. Keep reporting issues to help your community!</p>
     <div style="text-align:center;margin:20px 0;">
-      <a href="https://aquaflow-jylh.onrender.com/user/dashboard"
+      <a href="https://smart-water-system-h73w.onrender.com/user/dashboard"
          style="background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;text-decoration:none;
                 padding:12px 32px;border-radius:50px;font-weight:700;">
         View My Dashboard →
       </a>
     </div>
     """
-    msg = Message(subject="AquaFlow — Complaint Resolved 🎉",
-                  recipients=[user_email],
-                  html=_base_html("Issue Resolved!", content))
-    _send(msg)
+    _send_async(user_email, username,
+                "AquaFlow — Complaint Resolved 🎉",
+                _base_html("Issue Resolved!", content))
+
 
 def send_schedule_alert(emails, colony, action, date_time_str, notes=''):
     """Sent to all users in a colony when a new schedule is created."""
     if not emails:
         return
-    color = "#198754" if action == "Supply" else "#dc3545"
-    icon  = "💧" if action == "Supply" else "🚫"
+    color  = "#198754" if action == "Supply" else "#dc3545"
+    icon   = "💧" if action == "Supply" else "🚫"
     note_block = f'<p style="color:#4a5568;"><strong>Notes:</strong> {notes}</p>' if notes else ''
     content = f"""
     <p>Dear <strong>{colony}</strong> Resident,</p>
@@ -148,42 +214,20 @@ def send_schedule_alert(emails, colony, action, date_time_str, notes=''):
     </div>
     <p>Log in to your dashboard to view the full schedule.</p>
     <div style="text-align:center;margin:20px 0;">
-      <a href="https://aquaflow-jylh.onrender.com/user/dashboard"
+      <a href="https://smart-water-system-h73w.onrender.com/user/dashboard"
          style="background:linear-gradient(135deg,#0077b6,#00b4d8);color:#fff;text-decoration:none;
                 padding:12px 32px;border-radius:50px;font-weight:700;">
         View Schedule →
       </a>
     </div>
     """
-    msg = Message(
-        subject=f"AquaFlow — {action} Scheduled for {colony} {icon}",
-        recipients=emails,
-        html=_base_html(f"Water {action} Alert — {colony}", content)
-    )
-    _send(msg)
-
-# ── Internal helper ───────────────────────────────────────────────
-
-from flask import current_app
-import threading
-
-def _send_async_email(app, msg):
-    with app.app_context():
-        try:
-            mail.send(msg)
-        except Exception as e:
-            print(f"[AquaFlow Mail] Failed to send email: {e}")
-
-def _send(msg):
-    """Send mail silently in a thread — never crash the app if email fails.
-    
-    Guards against missing MAIL_USERNAME to avoid silent thread errors
-    on deployments where email is not yet configured.
-    """
+    html = _base_html(f"Water {action} Alert — {colony}", content)
+    subject = f"AquaFlow — {action} Scheduled for {colony} {icon}"
+    # Send to each recipient separately (Brevo free tier works best this way)
     app = current_app._get_current_object()
-    # Skip entirely if email is not configured (prevents background thread failures)
-    if not app.config.get('MAIL_USERNAME'):
-        print(f"[AquaFlow Mail] MAIL_USERNAME not configured — skipping email to {msg.recipients}")
-        return
-    thread = threading.Thread(target=_send_async_email, args=[app, msg], daemon=True)
-    thread.start()
+    for email in emails:
+        def _send_one(e=email):
+            with app.app_context():
+                _send_via_brevo(e, colony + " Resident", subject, html)
+        t = threading.Thread(target=_send_one, daemon=False)
+        t.start()
