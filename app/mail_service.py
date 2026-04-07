@@ -143,9 +143,26 @@ def send_schedule_alert(emails, colony, action, date_time_str, notes=''):
 
 # ── Internal helper ───────────────────────────────────────────────
 
+from flask import current_app
+import threading
+
+def _send_async_email(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+        except Exception as e:
+            print(f"[AquaFlow Mail] Failed to send email: {e}")
+
 def _send(msg):
-    """Send mail silently — never crash the app if email fails."""
-    try:
-        mail.send(msg)
-    except Exception as e:
-        print(f"[AquaFlow Mail] Failed to send email: {e}")
+    """Send mail silently in a thread — never crash the app if email fails.
+    
+    Guards against missing MAIL_USERNAME to avoid silent thread errors
+    on deployments where email is not yet configured.
+    """
+    app = current_app._get_current_object()
+    # Skip entirely if email is not configured (prevents background thread failures)
+    if not app.config.get('MAIL_USERNAME'):
+        print(f"[AquaFlow Mail] MAIL_USERNAME not configured — skipping email to {msg.recipients}")
+        return
+    thread = threading.Thread(target=_send_async_email, args=[app, msg], daemon=True)
+    thread.start()

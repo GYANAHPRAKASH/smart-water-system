@@ -210,15 +210,23 @@ def resolve_complaint(complaint_id):
 def schedule_supply():
     if current_user.role != 'admin':
         return redirect(url_for('user.dashboard'))
-        
-    colony = request.form.get('colony')
-    date_str = request.form.get('date')
-    time_str = request.form.get('time')
-    action = request.form.get('action')
-    notes = request.form.get('notes')
-    
-    date_time = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
-    
+
+    colony = request.form.get('colony', '').strip()
+    date_str = request.form.get('date', '').strip()
+    time_str = request.form.get('time', '').strip()
+    action = request.form.get('action', 'Supply').strip()
+    notes = request.form.get('notes', '').strip()
+
+    if not colony or not date_str or not time_str:
+        flash('Please fill in all required fields (Colony, Date, Time).', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
+    try:
+        date_time = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
+    except ValueError:
+        flash('Invalid date or time format. Please use the date/time pickers.', 'danger')
+        return redirect(url_for('admin.dashboard'))
+
     if action == 'Shutdown':
         start_of_day = date_time.replace(hour=0, minute=0, second=0, microsecond=0)
         end_of_day = date_time.replace(hour=23, minute=59, second=59, microsecond=999)
@@ -227,7 +235,7 @@ def schedule_supply():
             'action': 'Supply',
             'date_time': {'$gte': start_of_day, '$lte': end_of_day}
         })
-    
+
     new_schedule = {
         'colony': colony,
         'date_time': date_time,

@@ -35,6 +35,18 @@ def register():
             flash('Username already exists. Please choose a different one.', 'danger')
             return redirect(url_for('auth.register'))
 
+        if email and mongo.db.users.find_one({'email': email}):
+            flash('An account with this email already exists. Please use a different email or login.', 'danger')
+            return redirect(url_for('auth.register'))
+
+        if not username or len(username) < 4:
+            flash('Username must be at least 4 characters.', 'danger')
+            return redirect(url_for('auth.register'))
+
+        if not password or len(password) < 6:
+            flash('Password must be at least 6 characters.', 'danger')
+            return redirect(url_for('auth.register'))
+
         new_user_data = {
             'username':      username,
             'first_name':    first_name,

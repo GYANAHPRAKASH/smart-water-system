@@ -160,7 +160,8 @@
                     </div>
                     <!-- AI Priority Preview Badge -->
                     <div class="text-end mb-3" style="min-height: 30px;">
-                        <small id="ai-priority-badge" class="badge bg-secondary rounded-pill px-3 py-2 lh-sm transition-all" style="display: none; opacity: 0; transition: opacity 0.3s ease;">
+                        <small id="ai-priority-badge" class="badge bg-secondary rounded-pill px-3 py-2 lh-sm"
+                            style="visibility: hidden; opacity: 0; transition: opacity 0.4s ease, visibility 0.4s ease;">
                             <span class="spinner-border spinner-border-sm me-1" role="status"></span> Analyzing...
                         </small>
                     </div>
@@ -359,14 +360,15 @@
 
             if (text.length < 10) {
                 priorityBadge.style.opacity = '0';
-                setTimeout(() => priorityBadge.style.display = 'none', 300);
+                priorityBadge.style.visibility = 'hidden';
                 return;
             }
 
-            priorityBadge.style.display = 'inline-block';
-            priorityBadge.offsetHeight; // force reflow
+            // Show spinner immediately
+            priorityBadge.style.visibility = 'visible';
             priorityBadge.style.opacity = '1';
-            priorityBadge.className = 'badge bg-secondary rounded-pill px-3 py-2 lh-sm transition-all';
+            priorityBadge.className = 'badge bg-secondary rounded-pill px-3 py-2 lh-sm';
+            priorityBadge.style.transition = 'opacity 0.4s ease, visibility 0.4s ease';
             priorityBadge.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> AI Analyzing...`;
 
             debounceTimer = setTimeout(() => {
@@ -383,12 +385,13 @@
                         if (prio === 'High')   { bgClass = 'bg-danger';          icon = 'bi-exclamation-octagon'; }
                         else if (prio === 'Medium') { bgClass = 'bg-warning text-dark'; icon = 'bi-exclamation-triangle'; }
                         else if (prio === 'Low')  { bgClass = 'bg-success';         icon = 'bi-check-circle'; }
-                        priorityBadge.className = `badge ${bgClass} rounded-pill px-3 py-2 lh-sm transition-all shadow-sm`;
+                        priorityBadge.className = `badge ${bgClass} rounded-pill px-3 py-2 lh-sm shadow-sm`;
+                        priorityBadge.style.transition = 'opacity 0.4s ease, visibility 0.4s ease';
                         priorityBadge.innerHTML = `<i class="bi ${icon} me-1"></i> AI Priority: <strong>${prio}</strong>`;
                     }
                 })
-                .catch(err => console.error(err));
-            }, 1000);
+                .catch(err => console.error('AI classify error:', err));
+            }, 800);
         });
     });
 </script>
