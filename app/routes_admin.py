@@ -7,7 +7,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 import threading
 from .ai_module import analyze_complaint, generate_simulated_data, predict_demand, detect_anomalies
-from .mail_service import send_account_approved, send_account_rejected, send_complaint_resolved, send_schedule_alert
+from .mail_service import send_account_approved, send_account_rejected, send_account_deleted, send_complaint_resolved, send_schedule_alert
 
 admin = Blueprint('admin', __name__)
 
@@ -178,9 +178,15 @@ def reject_user(user_id):
 def delete_user(user_id):
     if current_user.role != 'admin':
         return redirect(url_for('user.dashboard'))
-        
+
+    # Fetch user data BEFORE deleting so we can send the notification email
+    user_data = mongo.db.users.find_one({'_id': ObjectId(user_id)})
     mongo.db.users.delete_one({'_id': ObjectId(user_id)})
-    flash('User has been deleted.', 'danger')
+
+    if user_data and user_data.get('email'):
+        _send_async(send_account_deleted, user_data.get('email'), user_data.get('username', 'User'))
+
+    flash('User has been deleted and notified by email.', 'danger')
     return redirect(url_for('admin.dashboard'))
 
 @admin.route("/admin/resolve_complaint/<complaint_id>")

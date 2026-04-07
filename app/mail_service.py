@@ -83,6 +83,27 @@ def send_account_rejected(user_email, username):
                   html=_base_html("Account Status Update", content))
     _send(msg)
 
+def send_account_deleted(user_email, username):
+    """Sent when admin permanently deletes a user account."""
+    if not user_email:
+        return
+    content = f"""
+    <p>Hi <strong>{username}</strong>,</p>
+    <p>Your AquaFlow account has been <strong style="color:#dc3545;">permanently removed</strong> by the city administrator.</p>
+    <p>If you believe this was a mistake, please contact the City Admin immediately:</p>
+    <div style="background:#fff3cd;border-radius:10px;padding:14px 18px;margin:18px 0;border-left:4px solid #ffc107;">
+      <p style="margin:0;color:#664d03;">
+        📧 <a href="mailto:vsgpvsjd2006@gmail.com" style="color:#0077b6;">vsgpvsjd2006@gmail.com</a><br>
+        📞 <strong>+91 98765 43210</strong>
+      </p>
+    </div>
+    <p style="color:#6c757d;font-size:0.9rem;">This action cannot be undone. If you wish to rejoin AquaFlow, you may register again and await admin approval.</p>
+    """
+    msg = Message(subject="AquaFlow — Account Removed",
+                  recipients=[user_email],
+                  html=_base_html("Account Removed 🚫", content))
+    _send(msg)
+
 def send_complaint_resolved(user_email, username, credits_awarded=10):
     """Sent when admin resolves a complaint and awards credits."""
     if not user_email:
