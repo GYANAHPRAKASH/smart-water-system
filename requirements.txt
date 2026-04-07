@@ -8,3 +8,4 @@ requests
 Flask-Mail
 scikit-learn
 numpy
+python-dotenv

@@ -1,4 +1,8 @@
 # pyre-ignore-all-errors
+# Load .env file automatically for local development
+from dotenv import load_dotenv
+load_dotenv()
+
 from app import create_app, mongo
 from app.models import User
 
