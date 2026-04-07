@@ -237,7 +237,8 @@
                                 <th>Priority (AI)</th>
                                 <th>Status</th>
                                 <th>Date</th>
-                                <th>Action</th>
+                                <th>Resolve</th>
+                                <th>Delete</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -265,11 +266,18 @@
                                     {% if complaint.status != 'Resolved' %}
                                     <a href="{{ url_for('admin.resolve_complaint', complaint_id=complaint.id) }}"
                                         class="btn btn-sm btn-success rounded-pill shadow-sm">
-                                        <i class="bi bi-check-lg me-1"></i>Resolve (+10 Credits)
+                                        <i class="bi bi-check-lg me-1"></i>Resolve (+10 🪙)
                                     </a>
                                     {% else %}
                                     <span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Resolved</span>
                                     {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('admin.delete_complaint', complaint_id=complaint.id) }}"
+                                        class="btn btn-sm btn-outline-danger rounded-pill shadow-sm"
+                                        onclick="return confirm('Delete this complaint permanently? This cannot be undone.')">
+                                        <i class="bi bi-trash-fill me-1"></i>Delete
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -282,6 +290,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- User Management Tab -->
     <div class="tab-pane fade" id="users-content" role="tabpanel" aria-labelledby="users-tab">

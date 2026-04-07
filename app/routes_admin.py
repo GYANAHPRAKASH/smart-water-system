@@ -197,6 +197,20 @@ def resolve_complaint(complaint_id):
         
     return redirect(url_for('admin.dashboard'))
 
+@admin.route("/admin/delete_complaint/<complaint_id>")
+@login_required
+def delete_complaint(complaint_id):
+    """Permanently delete a complaint record (admin only)."""
+    if current_user.role != 'admin':
+        return redirect(url_for('user.dashboard'))
+
+    result = mongo.db.complaints.delete_one({'_id': ObjectId(complaint_id)})
+    if result.deleted_count:
+        flash('Complaint deleted successfully.', 'success')
+    else:
+        flash('Complaint not found or already deleted.', 'warning')
+    return redirect(url_for('admin.dashboard'))
+
 @admin.route("/admin/schedule_supply", methods=['POST'])
 @login_required
 def schedule_supply():
